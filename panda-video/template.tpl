@@ -39,7 +39,7 @@ log('data =', data);
 
 const injectScript = require("injectScript");
 
-injectScript("https://s3.sa-east-1.amazonaws.com/download.metricasboss.com.br/js/panda.js", data.gtmOnSuccess, data.gtmOnFailure);
+injectScript("https://gtm-templates.s3.us-east-1.amazonaws.com/bundle.js", data.gtmOnSuccess, data.gtmOnFailure);
 
 
 ___WEB_PERMISSIONS___
@@ -77,7 +77,7 @@ ___WEB_PERMISSIONS___
             "listItem": [
               {
                 "type": 1,
-                "string": "https://s3.sa-east-1.amazonaws.com/download.metricasboss.com.br/js/panda.js"
+                "string": "https://gtm-templates.s3.us-east-1.amazonaws.com/bundle.js"
               }
             ]
           }
@@ -99,10 +99,6 @@ scenarios: []
 
 ___NOTES___
 
-Created on 3/21/2025, 12:00:52 PM
-
-___DEPLOY_COMMAND___
-
-aws s3 cp /Users/lucianfialho/Code/metricasboss/gtm-templates/panda-video/template.tpl s3://your-s3-bucket-name/path/to/template.tpl
+Created on 3/21/2025, 12:25:02 PM
 
 
