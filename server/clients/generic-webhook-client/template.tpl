@@ -69,9 +69,13 @@ const logToConsole = require('logToConsole');
 const getTimestampMillis = require('getTimestampMillis');
 
 // Função isolada para debug log
-function debugLog() {
+function debugLog(message, obj) {
     if (data.enableDebug) {
-        logToConsole.apply(null, arguments);
+        if (obj) {
+            logToConsole('[Generic Webhook Client]', message, obj);
+        } else {
+            logToConsole('[Generic Webhook Client]', message);
+        }
     }
 }
 
