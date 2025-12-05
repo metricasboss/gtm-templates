@@ -346,28 +346,52 @@ const PAISES_FALLBACK = {
 const normalizar = function(texto) {
   if (!texto) return '';
 
-  const mapa = {
-    'á':'a', 'à':'a', 'ã':'a', 'â':'a', 'ä':'a',
-    'é':'e', 'è':'e', 'ê':'e', 'ë':'e',
-    'í':'i', 'ì':'i', 'î':'i', 'ï':'i',
-    'ó':'o', 'ò':'o', 'õ':'o', 'ô':'o', 'ö':'o',
-    'ú':'u', 'ù':'u', 'û':'u', 'ü':'u',
-    'ç':'c', 'ñ':'n',
-    'Á':'a', 'À':'a', 'Ã':'a', 'Â':'a', 'Ä':'a',
-    'É':'e', 'È':'e', 'Ê':'e', 'Ë':'e',
-    'Í':'i', 'Ì':'i', 'Î':'i', 'Ï':'i',
-    'Ó':'o', 'Ò':'o', 'Õ':'o', 'Ô':'o', 'Ö':'o',
-    'Ú':'u', 'Ù':'u', 'Û':'u', 'Ü':'u',
-    'Ç':'c', 'Ñ':'n'
-  };
-
+  // Normalização character-by-character para evitar problemas com regex no GTM Sandbox
   var result = '';
   for (var i = 0; i < texto.length; i++) {
     var c = texto.charAt(i);
-    result += mapa[c] || c;
+
+    // Vogais com acento -> sem acento
+    if (c === 'á' || c === 'à' || c === 'ã' || c === 'â' || c === 'ä' ||
+        c === 'Á' || c === 'À' || c === 'Ã' || c === 'Â' || c === 'Ä') {
+      result += 'a';
+    } else if (c === 'é' || c === 'è' || c === 'ê' || c === 'ë' ||
+               c === 'É' || c === 'È' || c === 'Ê' || c === 'Ë') {
+      result += 'e';
+    } else if (c === 'í' || c === 'ì' || c === 'î' || c === 'ï' ||
+               c === 'Í' || c === 'Ì' || c === 'Î' || c === 'Ï') {
+      result += 'i';
+    } else if (c === 'ó' || c === 'ò' || c === 'õ' || c === 'ô' || c === 'ö' ||
+               c === 'Ó' || c === 'Ò' || c === 'Õ' || c === 'Ô' || c === 'Ö') {
+      result += 'o';
+    } else if (c === 'ú' || c === 'ù' || c === 'û' || c === 'ü' ||
+               c === 'Ú' || c === 'Ù' || c === 'Û' || c === 'Ü') {
+      result += 'u';
+    } else if (c === 'ç' || c === 'Ç') {
+      result += 'c';
+    } else if (c === 'ñ' || c === 'Ñ') {
+      result += 'n';
+    } else if (c === ' ') {
+      // Remove espaços
+      result += '';
+    } else {
+      result += c;
+    }
   }
 
-  return result.toLowerCase().split(' ').join('').replace(/[^a-z0-9]/g, '');
+  // Lowercase e remove caracteres especiais
+  result = result.toLowerCase();
+
+  // Remove caracteres não alfanuméricos (character-by-character)
+  var final = '';
+  for (var j = 0; j < result.length; j++) {
+    var ch = result.charAt(j);
+    if ((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')) {
+      final += ch;
+    }
+  }
+
+  return final;
 };
 
 const processarComDados = function(city, state, country, estadosData, paisesData, cidadesData) {
