@@ -346,41 +346,38 @@ const PAISES_FALLBACK = {
 const normalizar = function(texto) {
   if (!texto) return '';
 
+  const lower = texto.toLowerCase();
   var result = '';
-  for (var i = 0; i < texto.length; i++) {
-    var c = texto.charAt(i);
-    if (c === 'á' || c === 'à' || c === 'ã' || c === 'â' || c === 'ä' || c === 'Á' || c === 'À' || c === 'Ã' || c === 'Â' || c === 'Ä') {
-      result += 'a';
-    } else if (c === 'é' || c === 'è' || c === 'ê' || c === 'ë' || c === 'É' || c === 'È' || c === 'Ê' || c === 'Ë') {
-      result += 'e';
-    } else if (c === 'í' || c === 'ì' || c === 'î' || c === 'ï' || c === 'Í' || c === 'Ì' || c === 'Î' || c === 'Ï') {
-      result += 'i';
-    } else if (c === 'ó' || c === 'ò' || c === 'õ' || c === 'ô' || c === 'ö' || c === 'Ó' || c === 'Ò' || c === 'Õ' || c === 'Ô' || c === 'Ö') {
-      result += 'o';
-    } else if (c === 'ú' || c === 'ù' || c === 'û' || c === 'ü' || c === 'Ú' || c === 'Ù' || c === 'Û' || c === 'Ü') {
-      result += 'u';
-    } else if (c === 'ç' || c === 'Ç') {
-      result += 'c';
-    } else if (c === 'ñ' || c === 'Ñ') {
-      result += 'n';
-    } else if (c === ' ') {
-      result += '';
-    } else {
-      result += c;
+
+  var i = 0;
+  while (i < lower.length) {
+    const c = lower.charAt(i);
+    const code = lower.charCodeAt(i);
+
+    if (code === 225 || code === 224 || code === 227 || code === 226 || code === 228) {
+      result = result + 'a';
+    } else if (code === 233 || code === 232 || code === 234 || code === 235) {
+      result = result + 'e';
+    } else if (code === 237 || code === 236 || code === 238 || code === 239) {
+      result = result + 'i';
+    } else if (code === 243 || code === 242 || code === 245 || code === 244 || code === 246) {
+      result = result + 'o';
+    } else if (code === 250 || code === 249 || code === 251 || code === 252) {
+      result = result + 'u';
+    } else if (code === 231) {
+      result = result + 'c';
+    } else if (code === 241) {
+      result = result + 'n';
+    } else if (code === 32) {
+      result = result + '';
+    } else if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
+      result = result + c;
     }
+
+    i = i + 1;
   }
 
-  result = result.toLowerCase();
-
-  var final = '';
-  for (var j = 0; j < result.length; j++) {
-    var ch = result.charAt(j);
-    if ((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')) {
-      final += ch;
-    }
-  }
-
-  return final;
+  return result;
 };
 
 const processarComDados = function(city, state, country, estadosData, paisesData, cidadesData) {
