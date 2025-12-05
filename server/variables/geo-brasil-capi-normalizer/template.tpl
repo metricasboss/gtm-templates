@@ -346,43 +346,32 @@ const PAISES_FALLBACK = {
 const normalizar = function(texto) {
   if (!texto) return '';
 
-  // Normalização character-by-character para evitar problemas com regex no GTM Sandbox
   var result = '';
   for (var i = 0; i < texto.length; i++) {
     var c = texto.charAt(i);
-
-    // Vogais com acento -> sem acento
-    if (c === 'á' || c === 'à' || c === 'ã' || c === 'â' || c === 'ä' ||
-        c === 'Á' || c === 'À' || c === 'Ã' || c === 'Â' || c === 'Ä') {
+    if (c === 'á' || c === 'à' || c === 'ã' || c === 'â' || c === 'ä' || c === 'Á' || c === 'À' || c === 'Ã' || c === 'Â' || c === 'Ä') {
       result += 'a';
-    } else if (c === 'é' || c === 'è' || c === 'ê' || c === 'ë' ||
-               c === 'É' || c === 'È' || c === 'Ê' || c === 'Ë') {
+    } else if (c === 'é' || c === 'è' || c === 'ê' || c === 'ë' || c === 'É' || c === 'È' || c === 'Ê' || c === 'Ë') {
       result += 'e';
-    } else if (c === 'í' || c === 'ì' || c === 'î' || c === 'ï' ||
-               c === 'Í' || c === 'Ì' || c === 'Î' || c === 'Ï') {
+    } else if (c === 'í' || c === 'ì' || c === 'î' || c === 'ï' || c === 'Í' || c === 'Ì' || c === 'Î' || c === 'Ï') {
       result += 'i';
-    } else if (c === 'ó' || c === 'ò' || c === 'õ' || c === 'ô' || c === 'ö' ||
-               c === 'Ó' || c === 'Ò' || c === 'Õ' || c === 'Ô' || c === 'Ö') {
+    } else if (c === 'ó' || c === 'ò' || c === 'õ' || c === 'ô' || c === 'ö' || c === 'Ó' || c === 'Ò' || c === 'Õ' || c === 'Ô' || c === 'Ö') {
       result += 'o';
-    } else if (c === 'ú' || c === 'ù' || c === 'û' || c === 'ü' ||
-               c === 'Ú' || c === 'Ù' || c === 'Û' || c === 'Ü') {
+    } else if (c === 'ú' || c === 'ù' || c === 'û' || c === 'ü' || c === 'Ú' || c === 'Ù' || c === 'Û' || c === 'Ü') {
       result += 'u';
     } else if (c === 'ç' || c === 'Ç') {
       result += 'c';
     } else if (c === 'ñ' || c === 'Ñ') {
       result += 'n';
     } else if (c === ' ') {
-      // Remove espaços
       result += '';
     } else {
       result += c;
     }
   }
 
-  // Lowercase e remove caracteres especiais
   result = result.toLowerCase();
 
-  // Remove caracteres não alfanuméricos (character-by-character)
   var final = '';
   for (var j = 0; j < result.length; j++) {
     var ch = result.charAt(j);
