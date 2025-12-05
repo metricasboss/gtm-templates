@@ -329,7 +329,7 @@ const processarComDados = function(city, state, country, estadosData, paisesData
 
   var cityNorm = '';
   if (city && cidadesData) {
-    const cityKey = city.toLowerCase().trim();
+    var cityKey = city.toLowerCase().trim();
     cityNorm = cidadesData[cityKey] || '';
     log('Cidade', { input: city, normalized: cityNorm });
   }
@@ -337,8 +337,8 @@ const processarComDados = function(city, state, country, estadosData, paisesData
   var stateName = '';
   var stateCode = '';
   if (state && estadosData) {
-    const stateKey = state.toUpperCase().trim();
-    const stateData = estadosData[stateKey];
+    var stateKey = state.toUpperCase().trim();
+    var stateData = estadosData[stateKey];
     if (stateData) {
       stateName = stateData.name || '';
       stateCode = stateData.code || '';
@@ -349,8 +349,8 @@ const processarComDados = function(city, state, country, estadosData, paisesData
   var countryName = '';
   var countryCode = '';
   if (country && paisesData) {
-    const countryKey = country.toUpperCase().trim();
-    const countryData = paisesData[countryKey];
+    var countryKey = country.toUpperCase().trim();
+    var countryData = paisesData[countryKey];
     if (countryData) {
       countryName = countryData.name || '';
       countryCode = countryData.code || '';
@@ -413,7 +413,7 @@ const resultCacheKey = 'geo_result_' + city + '_' + state + '_' + country;
 const now = getTimestampMillis();
 
 if (CACHE_ENABLED) {
-  const cachedResult = templateStorage.getItem(resultCacheKey);
+  var cachedResult = templateStorage.getItem(resultCacheKey);
   if (cachedResult && cachedResult.data && (now - cachedResult.timestamp) < CACHE_TTL) {
     log('Cache HIT (resultado)', { key: resultCacheKey });
     return extrairValor(cachedResult.data, OUTPUT_TYPE);
@@ -436,9 +436,9 @@ var paisesData = null;
 var cidadesData = null;
 
 if (CACHE_ENABLED) {
-  const cachedEstados = templateStorage.getItem(estadosCacheKey);
-  const cachedPaises = templateStorage.getItem(paisesCacheKey);
-  const cachedCidades = templateStorage.getItem(cidadesCacheKey);
+  var cachedEstados = templateStorage.getItem(estadosCacheKey);
+  var cachedPaises = templateStorage.getItem(paisesCacheKey);
+  var cachedCidades = templateStorage.getItem(cidadesCacheKey);
 
   if (cachedEstados && (now - cachedEstados.timestamp) < CACHE_TTL) {
     estadosData = cachedEstados.data;
@@ -546,8 +546,7 @@ if (!estadosData) {
 
     if (statusCode === 200) {
       try {
-        const parsed = JSON.parse(body);
-        // Remove _meta
+        var parsed = JSON.parse(body);
         delete parsed._meta;
         estadosData = parsed;
         log('Estados carregados com sucesso');
@@ -577,8 +576,7 @@ if (!paisesData) {
 
     if (statusCode === 200) {
       try {
-        const parsed = JSON.parse(body);
-        // Remove _meta
+        var parsed = JSON.parse(body);
         delete parsed._meta;
         paisesData = parsed;
         log('Países carregados com sucesso');
@@ -608,14 +606,12 @@ if (cidadesUrl && !cidadesData) {
 
     if (statusCode === 200) {
       try {
-        const parsed = JSON.parse(body);
-        // Remove _meta
+        var parsed = JSON.parse(body);
         delete parsed._meta;
         cidadesData = parsed;
         log('Cidades do estado ' + stateUpper + ' carregadas com sucesso');
       } catch (e) {
         log('Erro ao parsear cidades-' + stateUpper.toLowerCase() + '.json', { error: e });
-        // Não marca como hasError porque cidades é opcional (fallback algorítmico)
         cidadesData = null;
       }
     } else if (statusCode === 404) {
