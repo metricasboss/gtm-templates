@@ -156,27 +156,9 @@ ___TEMPLATE_PARAMETERS___
   {
     "type": "GROUP",
     "name": "fallbackGroup",
-    "displayName": "Fallback e Recuperação",
+    "displayName": "Debug",
     "groupStyle": "ZIPPY_CLOSED",
     "subParams": [
-      {
-        "type": "RADIO",
-        "name": "cityNormalizationMode",
-        "displayName": "Modo de normalização de cidades",
-        "radioItems": [
-          {
-            "value": "algorithmic",
-            "displayValue": "Algorítmica (remove acentos/espaços)"
-          },
-          {
-            "value": "passthrough",
-            "displayValue": "Passthrough (mantém original)"
-          }
-        ],
-        "simpleValueType": true,
-        "defaultValue": "algorithmic",
-        "help": "Modo algorítmico: 'São Paulo' → 'saopaulo'. Passthrough: mantém 'São Paulo' (não recomendado para CAPI)"
-      },
       {
         "type": "CHECKBOX",
         "name": "enableDebug",
@@ -276,7 +258,6 @@ const CDN_BASE_URL = data.cdnBaseUrl || 'https:' + '/' + '/' + 'cdn.jsdelivr.net
 const OUTPUT_TYPE = data.outputType;
 const CACHE_ENABLED = data.enableCache;
 const CACHE_TTL = (data.cacheTtl || 86400) * 1000; // Padrão: 24 horas
-const CITY_MODE = data.cityNormalizationMode || 'algorithmic';
 const DEBUG = data.enableDebug;
 const CDN_TIMEOUT = data.cdnTimeout || 2000;
 
@@ -340,91 +321,52 @@ const PAISES_FALLBACK = {
 };
 
 // ============================================
-// FUNÇÕES DE NORMALIZAÇÃO (FALLBACK)
+// PROCESSAMENTO DE DADOS
 // ============================================
-
-const normalizar = function(texto) {
-  if (!texto) return '';
-
-  const lower = texto.toLowerCase();
-  var result = '';
-
-  var i = 0;
-  while (i < lower.length) {
-    const c = lower.charAt(i);
-    const code = lower.charCodeAt(i);
-
-    if (code === 225 || code === 224 || code === 227 || code === 226 || code === 228) {
-      result = result + 'a';
-    } else if (code === 233 || code === 232 || code === 234 || code === 235) {
-      result = result + 'e';
-    } else if (code === 237 || code === 236 || code === 238 || code === 239) {
-      result = result + 'i';
-    } else if (code === 243 || code === 242 || code === 245 || code === 244 || code === 246) {
-      result = result + 'o';
-    } else if (code === 250 || code === 249 || code === 251 || code === 252) {
-      result = result + 'u';
-    } else if (code === 231) {
-      result = result + 'c';
-    } else if (code === 241) {
-      result = result + 'n';
-    } else if (code === 32) {
-      result = result + '';
-    } else if ((code >= 97 && code <= 122) || (code >= 48 && code <= 57)) {
-      result = result + c;
-    }
-
-    i = i + 1;
-  }
-
-  return result;
-};
 
 const processarComDados = function(city, state, country, estadosData, paisesData, cidadesData) {
   log('Processando dados geográficos', { city: city, state: state, country: country });
 
-  // Normaliza cidade
-  var cityNorm;
-  if (cidadesData && city) {
-    // Tenta buscar no mapeamento de cidades
-    const cityLower = city.toLowerCase().trim();
-    cityNorm = cidadesData[cityLower];
-
-    if (!cityNorm) {
-      // Se não encontrou no mapeamento, usa normalização algorítmica
-      cityNorm = CITY_MODE === 'algorithmic' ? normalizar(city) : cityLower;
-      log('Cidade não encontrada no mapeamento, usando fallback', { city: city, normalized: cityNorm });
-    } else {
-      log('Cidade encontrada no mapeamento', { city: city, normalized: cityNorm });
-    }
-  } else {
-    // Sem mapeamento de cidades, usa normalização algorítmica
-    cityNorm = CITY_MODE === 'algorithmic' ? normalizar(city) : city.toLowerCase().trim();
+  var cityNorm = '';
+  if (city && cidadesData) {
+    const cityKey = city.toLowerCase().trim();
+    cityNorm = cidadesData[cityKey] || '';
+    log('Cidade', { input: city, normalized: cityNorm });
   }
 
-  // Processa estado
-  const stateUpper = state ? state.toUpperCase() : '';
-  const stateData = estadosData[stateUpper] || {
-    code: normalizar(state),
-    name: normalizar(state)
-  };
+  var stateName = '';
+  var stateCode = '';
+  if (state && estadosData) {
+    const stateKey = state.toUpperCase().trim();
+    const stateData = estadosData[stateKey];
+    if (stateData) {
+      stateName = stateData.name || '';
+      stateCode = stateData.code || '';
+    }
+    log('Estado', { input: state, name: stateName, code: stateCode });
+  }
 
-  // Processa país
-  const countryUpper = country ? country.toUpperCase() : '';
-  const countryData = paisesData[countryUpper] || {
-    code: normalizar(country),
-    name: normalizar(country)
-  };
+  var countryName = '';
+  var countryCode = '';
+  if (country && paisesData) {
+    const countryKey = country.toUpperCase().trim();
+    const countryData = paisesData[countryKey];
+    if (countryData) {
+      countryName = countryData.name || '';
+      countryCode = countryData.code || '';
+    }
+    log('País', { input: country, name: countryName, code: countryCode });
+  }
 
   return {
     city: cityNorm,
     city_sha256: cityNorm ? sha256Sync(cityNorm, {outputEncoding: 'hex'}) : '',
-    state: stateData.name,
-    state_code: stateData.code,
-    state_sha256: stateData.name ? sha256Sync(stateData.name, {outputEncoding: 'hex'}) : '',
-    country: countryData.name,
-    country_code: countryData.code,
-    country_sha256: countryData.name ? sha256Sync(countryData.name, {outputEncoding: 'hex'}) : ''
+    state: stateName,
+    state_code: stateCode,
+    state_sha256: stateName ? sha256Sync(stateName, {outputEncoding: 'hex'}) : '',
+    country: countryName,
+    country_code: countryCode,
+    country_sha256: countryName ? sha256Sync(countryName, {outputEncoding: 'hex'}) : ''
   };
 };
 
