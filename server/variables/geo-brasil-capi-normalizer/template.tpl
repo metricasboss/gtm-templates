@@ -507,8 +507,8 @@ if (estadosData && paisesData) {
 log('Buscando mapeamentos do jsDelivr');
 
 // URLs dos JSONs
-const estadosUrl = CDN_BASE_URL + '/estados.json';
-const paisesUrl = CDN_BASE_URL + '/paises.json';
+const estadosUrl = CDN_BASE_URL + '/' + 'estados.json';
+const paisesUrl = CDN_BASE_URL + '/' + 'paises.json';
 
 // Contador para sincronizar as duas requisições
 var requestsCompleted = 0;
