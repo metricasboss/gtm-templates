@@ -278,60 +278,58 @@ const log = function(message, obj) {
 // DADOS DE FALLBACK (se jsDelivr falhar)
 // ============================================
 
-const ESTADOS_FALLBACK = {
-  'AC': { code: 'ac', name: 'acre' },
-  'AL': { code: 'al', name: 'alagoas' },
-  'AP': { code: 'ap', name: 'amapa' },
-  'AM': { code: 'am', name: 'amazonas' },
-  'BA': { code: 'ba', name: 'bahia' },
-  'CE': { code: 'ce', name: 'ceara' },
-  'DF': { code: 'df', name: 'distritofederal' },
-  'ES': { code: 'es', name: 'espiritosanto' },
-  'GO': { code: 'go', name: 'goias' },
-  'MA': { code: 'ma', name: 'maranhao' },
-  'MT': { code: 'mt', name: 'matogrosso' },
-  'MS': { code: 'ms', name: 'matogrossodosul' },
-  'MG': { code: 'mg', name: 'minasgerais' },
-  'PA': { code: 'pa', name: 'para' },
-  'PB': { code: 'pb', name: 'paraiba' },
-  'PR': { code: 'pr', name: 'parana' },
-  'PE': { code: 'pe', name: 'pernambuco' },
-  'PI': { code: 'pi', name: 'piaui' },
-  'RJ': { code: 'rj', name: 'riodejaneiro' },
-  'RN': { code: 'rn', name: 'riograndedonorte' },
-  'RS': { code: 'rs', name: 'riograndedosul' },
-  'RO': { code: 'ro', name: 'rondonia' },
-  'RR': { code: 'rr', name: 'roraima' },
-  'SC': { code: 'sc', name: 'santacatarina' },
-  'SP': { code: 'sp', name: 'saopaulo' },
-  'SE': { code: 'se', name: 'sergipe' },
-  'TO': { code: 'to', name: 'tocantins' }
-};
+const ESTADOS_FALLBACK = {};
+ESTADOS_FALLBACK.AC = {}; ESTADOS_FALLBACK.AC.code = 'ac'; ESTADOS_FALLBACK.AC.name = 'acre';
+ESTADOS_FALLBACK.AL = {}; ESTADOS_FALLBACK.AL.code = 'al'; ESTADOS_FALLBACK.AL.name = 'alagoas';
+ESTADOS_FALLBACK.AP = {}; ESTADOS_FALLBACK.AP.code = 'ap'; ESTADOS_FALLBACK.AP.name = 'amapa';
+ESTADOS_FALLBACK.AM = {}; ESTADOS_FALLBACK.AM.code = 'am'; ESTADOS_FALLBACK.AM.name = 'amazonas';
+ESTADOS_FALLBACK.BA = {}; ESTADOS_FALLBACK.BA.code = 'ba'; ESTADOS_FALLBACK.BA.name = 'bahia';
+ESTADOS_FALLBACK.CE = {}; ESTADOS_FALLBACK.CE.code = 'ce'; ESTADOS_FALLBACK.CE.name = 'ceara';
+ESTADOS_FALLBACK.DF = {}; ESTADOS_FALLBACK.DF.code = 'df'; ESTADOS_FALLBACK.DF.name = 'distritofederal';
+ESTADOS_FALLBACK.ES = {}; ESTADOS_FALLBACK.ES.code = 'es'; ESTADOS_FALLBACK.ES.name = 'espiritosanto';
+ESTADOS_FALLBACK.GO = {}; ESTADOS_FALLBACK.GO.code = 'go'; ESTADOS_FALLBACK.GO.name = 'goias';
+ESTADOS_FALLBACK.MA = {}; ESTADOS_FALLBACK.MA.code = 'ma'; ESTADOS_FALLBACK.MA.name = 'maranhao';
+ESTADOS_FALLBACK.MT = {}; ESTADOS_FALLBACK.MT.code = 'mt'; ESTADOS_FALLBACK.MT.name = 'matogrosso';
+ESTADOS_FALLBACK.MS = {}; ESTADOS_FALLBACK.MS.code = 'ms'; ESTADOS_FALLBACK.MS.name = 'matogrossodosul';
+ESTADOS_FALLBACK.MG = {}; ESTADOS_FALLBACK.MG.code = 'mg'; ESTADOS_FALLBACK.MG.name = 'minasgerais';
+ESTADOS_FALLBACK.PA = {}; ESTADOS_FALLBACK.PA.code = 'pa'; ESTADOS_FALLBACK.PA.name = 'para';
+ESTADOS_FALLBACK.PB = {}; ESTADOS_FALLBACK.PB.code = 'pb'; ESTADOS_FALLBACK.PB.name = 'paraiba';
+ESTADOS_FALLBACK.PR = {}; ESTADOS_FALLBACK.PR.code = 'pr'; ESTADOS_FALLBACK.PR.name = 'parana';
+ESTADOS_FALLBACK.PE = {}; ESTADOS_FALLBACK.PE.code = 'pe'; ESTADOS_FALLBACK.PE.name = 'pernambuco';
+ESTADOS_FALLBACK.PI = {}; ESTADOS_FALLBACK.PI.code = 'pi'; ESTADOS_FALLBACK.PI.name = 'piaui';
+ESTADOS_FALLBACK.RJ = {}; ESTADOS_FALLBACK.RJ.code = 'rj'; ESTADOS_FALLBACK.RJ.name = 'riodejaneiro';
+ESTADOS_FALLBACK.RN = {}; ESTADOS_FALLBACK.RN.code = 'rn'; ESTADOS_FALLBACK.RN.name = 'riograndedonorte';
+ESTADOS_FALLBACK.RS = {}; ESTADOS_FALLBACK.RS.code = 'rs'; ESTADOS_FALLBACK.RS.name = 'riograndedosul';
+ESTADOS_FALLBACK.RO = {}; ESTADOS_FALLBACK.RO.code = 'ro'; ESTADOS_FALLBACK.RO.name = 'rondonia';
+ESTADOS_FALLBACK.RR = {}; ESTADOS_FALLBACK.RR.code = 'rr'; ESTADOS_FALLBACK.RR.name = 'roraima';
+ESTADOS_FALLBACK.SC = {}; ESTADOS_FALLBACK.SC.code = 'sc'; ESTADOS_FALLBACK.SC.name = 'santacatarina';
+ESTADOS_FALLBACK.SP = {}; ESTADOS_FALLBACK.SP.code = 'sp'; ESTADOS_FALLBACK.SP.name = 'saopaulo';
+ESTADOS_FALLBACK.SE = {}; ESTADOS_FALLBACK.SE.code = 'se'; ESTADOS_FALLBACK.SE.name = 'sergipe';
+ESTADOS_FALLBACK.TO = {}; ESTADOS_FALLBACK.TO.code = 'to'; ESTADOS_FALLBACK.TO.name = 'tocantins';
 
-const PAISES_FALLBACK = {
-  'BR': { code: 'br', name: 'brazil' },
-  'US': { code: 'us', name: 'unitedstates' },
-  'PT': { code: 'pt', name: 'portugal' },
-  'AR': { code: 'ar', name: 'argentina' },
-  'UY': { code: 'uy', name: 'uruguay' },
-  'PY': { code: 'py', name: 'paraguay' },
-  'CL': { code: 'cl', name: 'chile' },
-  'CO': { code: 'co', name: 'colombia' },
-  'MX': { code: 'mx', name: 'mexico' }
-};
+const PAISES_FALLBACK = {};
+PAISES_FALLBACK.BR = {}; PAISES_FALLBACK.BR.code = 'br'; PAISES_FALLBACK.BR.name = 'brazil';
+PAISES_FALLBACK.US = {}; PAISES_FALLBACK.US.code = 'us'; PAISES_FALLBACK.US.name = 'unitedstates';
+PAISES_FALLBACK.PT = {}; PAISES_FALLBACK.PT.code = 'pt'; PAISES_FALLBACK.PT.name = 'portugal';
+PAISES_FALLBACK.AR = {}; PAISES_FALLBACK.AR.code = 'ar'; PAISES_FALLBACK.AR.name = 'argentina';
+PAISES_FALLBACK.UY = {}; PAISES_FALLBACK.UY.code = 'uy'; PAISES_FALLBACK.UY.name = 'uruguay';
+PAISES_FALLBACK.PY = {}; PAISES_FALLBACK.PY.code = 'py'; PAISES_FALLBACK.PY.name = 'paraguay';
+PAISES_FALLBACK.CL = {}; PAISES_FALLBACK.CL.code = 'cl'; PAISES_FALLBACK.CL.name = 'chile';
+PAISES_FALLBACK.CO = {}; PAISES_FALLBACK.CO.code = 'co'; PAISES_FALLBACK.CO.name = 'colombia';
+PAISES_FALLBACK.MX = {}; PAISES_FALLBACK.MX.code = 'mx'; PAISES_FALLBACK.MX.name = 'mexico';
 
 // ============================================
 // PROCESSAMENTO DE DADOS
 // ============================================
 
 const processarComDados = function(city, state, country, estadosData, paisesData, cidadesData) {
-  log('Processando dados geográficos', { city: city, state: state, country: country });
+  log('Processando: city=' + city + ' state=' + state + ' country=' + country);
 
   var cityNorm = '';
   if (city && cidadesData) {
     var cityKey = city.toLowerCase().trim();
     cityNorm = cidadesData[cityKey] || '';
-    log('Cidade', { input: city, normalized: cityNorm });
+    log('Cidade: input=' + city + ' normalized=' + cityNorm);
   }
 
   var stateName = '';
@@ -343,7 +341,7 @@ const processarComDados = function(city, state, country, estadosData, paisesData
       stateName = stateData.name || '';
       stateCode = stateData.code || '';
     }
-    log('Estado', { input: state, name: stateName, code: stateCode });
+    log('Estado: input=' + state + ' name=' + stateName + ' code=' + stateCode);
   }
 
   var countryName = '';
@@ -355,19 +353,22 @@ const processarComDados = function(city, state, country, estadosData, paisesData
       countryName = countryData.name || '';
       countryCode = countryData.code || '';
     }
-    log('País', { input: country, name: countryName, code: countryCode });
+    log('Pais: input=' + country + ' name=' + countryName + ' code=' + countryCode);
   }
 
-  return {
-    city: cityNorm,
-    city_sha256: cityNorm ? sha256Sync(cityNorm, {outputEncoding: 'hex'}) : '',
-    state: stateName,
-    state_code: stateCode,
-    state_sha256: stateName ? sha256Sync(stateName, {outputEncoding: 'hex'}) : '',
-    country: countryName,
-    country_code: countryCode,
-    country_sha256: countryName ? sha256Sync(countryName, {outputEncoding: 'hex'}) : ''
-  };
+  var sha256Options = {};
+  sha256Options.outputEncoding = 'hex';
+
+  var result = {};
+  result.city = cityNorm;
+  result.city_sha256 = cityNorm ? sha256Sync(cityNorm, sha256Options) : '';
+  result.state = stateName;
+  result.state_code = stateCode;
+  result.state_sha256 = stateName ? sha256Sync(stateName, sha256Options) : '';
+  result.country = countryName;
+  result.country_code = countryCode;
+  result.country_sha256 = countryName ? sha256Sync(countryName, sha256Options) : '';
+  return result;
 };
 
 // ============================================
@@ -391,12 +392,12 @@ if (data.dataSource === 'custom') {
   city = data.customCity || '';
   state = data.customState || '';
   country = data.customCountry || '';
-  log('Usando valores customizados', { city: city, state: state, country: country });
+  log('Usando valores customizados: city=' + city + ' state=' + state + ' country=' + country);
 } else {
   city = getRequestHeader('x-geo-city') || '';
   state = getRequestHeader('x-geo-region') || '';
   country = getRequestHeader('x-geo-country') || '';
-  log('Lendo headers', { city: city, state: state, country: country });
+  log('Lendo headers: city=' + city + ' state=' + state + ' country=' + country);
 }
 
 // Se não há dados, retorna vazio
@@ -415,10 +416,10 @@ const now = getTimestampMillis();
 if (CACHE_ENABLED) {
   var cachedResult = templateStorage.getItem(resultCacheKey);
   if (cachedResult && cachedResult.data && (now - cachedResult.timestamp) < CACHE_TTL) {
-    log('Cache HIT (resultado)', { key: resultCacheKey });
+    log('Cache HIT (resultado): key=' + resultCacheKey);
     return extrairValor(cachedResult.data, OUTPUT_TYPE);
   }
-  log('Cache MISS (resultado)', { key: resultCacheKey });
+  log('Cache MISS (resultado): key=' + resultCacheKey);
 }
 
 // ============================================
@@ -540,7 +541,7 @@ const processarQuandoPronto = function() {
 
 // Busca estados.json
 if (!estadosData) {
-  log('Buscando estados.json', { url: estadosUrl });
+  log('Buscando estados.json: url=' + estadosUrl);
   sendHttpRequest(estadosUrl, function(statusCode, headers, body) {
     requestsCompleted++;
 
@@ -551,26 +552,28 @@ if (!estadosData) {
         estadosData = parsed;
         log('Estados carregados com sucesso');
       } catch (e) {
-        log('Erro ao parsear estados.json', { error: e });
+        log('Erro ao parsear estados.json: error=' + e);
         hasError = true;
       }
     } else {
-      log('Erro ao buscar estados.json', { statusCode: statusCode });
+      log('Erro ao buscar estados.json: statusCode=' + statusCode);
       hasError = true;
     }
 
     return processarQuandoPronto();
-  }, {
-    method: 'GET',
-    timeout: CDN_TIMEOUT
-  });
+  }, (function() {
+    var opts = {};
+    opts.method = 'GET';
+    opts.timeout = CDN_TIMEOUT;
+    return opts;
+  })());
 } else {
   requestsCompleted++;
 }
 
 // Busca paises.json
 if (!paisesData) {
-  log('Buscando paises.json', { url: paisesUrl });
+  log('Buscando paises.json: url=' + paisesUrl);
   sendHttpRequest(paisesUrl, function(statusCode, headers, body) {
     requestsCompleted++;
 
@@ -581,26 +584,28 @@ if (!paisesData) {
         paisesData = parsed;
         log('Países carregados com sucesso');
       } catch (e) {
-        log('Erro ao parsear paises.json', { error: e });
+        log('Erro ao parsear paises.json: error=' + e);
         hasError = true;
       }
     } else {
-      log('Erro ao buscar paises.json', { statusCode: statusCode });
+      log('Erro ao buscar paises.json: statusCode=' + statusCode);
       hasError = true;
     }
 
     return processarQuandoPronto();
-  }, {
-    method: 'GET',
-    timeout: CDN_TIMEOUT
-  });
+  }, (function() {
+    var opts = {};
+    opts.method = 'GET';
+    opts.timeout = CDN_TIMEOUT;
+    return opts;
+  })());
 } else {
   requestsCompleted++;
 }
 
 // Busca cidades-{uf}.json (se houver estado)
 if (cidadesUrl && !cidadesData) {
-  log('Buscando cidades do estado ' + stateUpper, { url: cidadesUrl });
+  log('Buscando cidades do estado ' + stateUpper + ': url=' + cidadesUrl);
   sendHttpRequest(cidadesUrl, function(statusCode, headers, body) {
     requestsCompleted++;
 
@@ -611,7 +616,7 @@ if (cidadesUrl && !cidadesData) {
         cidadesData = parsed;
         log('Cidades do estado ' + stateUpper + ' carregadas com sucesso');
       } catch (e) {
-        log('Erro ao parsear cidades-' + stateUpper.toLowerCase() + '.json', { error: e });
+        log('Erro ao parsear cidades-' + stateUpper.toLowerCase() + '.json: error=' + e);
         cidadesData = null;
       }
     } else if (statusCode === 404) {
@@ -619,16 +624,18 @@ if (cidadesUrl && !cidadesData) {
       log('JSON de cidades não existe para o estado ' + stateUpper + ', usando fallback');
       cidadesData = null;
     } else {
-      log('Erro ao buscar cidades-' + stateUpper.toLowerCase() + '.json', { statusCode: statusCode });
+      log('Erro ao buscar cidades-' + stateUpper.toLowerCase() + '.json: statusCode=' + statusCode);
       // Não marca como hasError porque cidades é opcional
       cidadesData = null;
     }
 
     return processarQuandoPronto();
-  }, {
-    method: 'GET',
-    timeout: CDN_TIMEOUT
-  });
+  }, (function() {
+    var opts = {};
+    opts.method = 'GET';
+    opts.timeout = CDN_TIMEOUT;
+    return opts;
+  })());
 } else if (!cidadesUrl) {
   // Não há estado, pula cidades
   requestsCompleted++;
