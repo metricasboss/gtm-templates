@@ -534,7 +534,8 @@ log('Buscando mapeamentos do jsDelivr');
 // URLs dos JSONs
 const estadosUrl = CDN_BASE_URL + '/' + 'estados.json';
 const paisesUrl = CDN_BASE_URL + '/' + 'paises.json';
-const cidadesUrl = stateUpper ? (CDN_BASE_URL + '/' + 'cidades-' + stateUpper.toLowerCase() + '.json') : null;
+const cidadesFileName = stateUpper ? ('cidades-' + stateUpper.toLowerCase() + '.json') : null;
+const cidadesUrl = cidadesFileName ? (CDN_BASE_URL + '/' + cidadesFileName) : null;
 
 // Contador para sincronizar as requisições (3 ou 2 dependendo se tem cidades)
 const totalRequests = cidadesUrl ? 3 : 2;
