@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "description": "Mapeamento de códigos ISO para nomes de países normalizados",
+    "version": "1.0.0",
+    "updated": "2025-12-05",
+    "total": 249
+  },
+  "BR": { "code": "br", "name": "brazil" },
+  "US": { "code": "us", "name": "unitedstates" },
+  "PT": { "code": "pt", "name": "portugal" },
+  "AR": { "code": "ar", "name": "argentina" },
+  "UY": { "code": "uy", "name": "uruguay" },
+  "PY": { "code": "py", "name": "paraguay" },
+  "CL": { "code": "cl", "name": "chile" },
+  "CO": { "code": "co", "name": "colombia" },
+  "MX": { "code": "mx", "name": "mexico" },
+  "PE": { "code": "pe", "name": "peru" },
+  "VE": { "code": "ve", "name": "venezuela" },
+  "EC": { "code": "ec", "name": "ecuador" },
+  "BO": { "code": "bo", "name": "bolivia" },
+  "ES": { "code": "es", "name": "spain" },
+  "IT": { "code": "it", "name": "italy" },
+  "FR": { "code": "fr", "name": "france" },
+  "DE": { "code": "de", "name": "germany" },
+  "GB": { "code": "gb", "name": "unitedkingdom" },
+  "CA": { "code": "ca", "name": "canada" },
+  "AU": { "code": "au", "name": "australia" },
+  "NZ": { "code": "nz", "name": "newzealand" },
+  "JP": { "code": "jp", "name": "japan" },
+  "CN": { "code": "cn", "name": "china" },
+  "IN": { "code": "in", "name": "india" },
+  "ZA": { "code": "za", "name": "southafrica" }
+}
