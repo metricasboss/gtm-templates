@@ -45,16 +45,7 @@ ___TEMPLATE_PARAMETERS___
         "displayName": "Base URL do jsDelivr",
         "simpleValueType": true,
         "defaultValue": "https://cdn.jsdelivr.net/gh/metricasboss/gtm-templates@main/server/variables/geo-brasil-capi-normalizer/data",
-        "help": "URL base do CDN onde estão os JSONs de mapeamento. Use o padrão ou customize para seu fork do repositório.",
-        "valueValidators": [
-          {
-            "type": "NON_EMPTY"
-          },
-          {
-            "type": "REGEX",
-            "args": ["^https?://.*"]
-          }
-        ]
+        "help": "URL base do CDN onde estão os JSONs de mapeamento. Use o padrão ou customize para seu fork do repositório."
       },
       {
         "type": "TEXT",
@@ -281,7 +272,7 @@ const logToConsole = require('logToConsole');
 // CONFIGURAÇÃO
 // ============================================
 
-const CDN_BASE_URL = data.cdnBaseUrl;
+const CDN_BASE_URL = data.cdnBaseUrl || 'https:' + '/' + '/' + 'cdn.jsdelivr.net' + '/' + 'gh' + '/' + 'metricasboss' + '/' + 'gtm-templates@main' + '/' + 'server' + '/' + 'variables' + '/' + 'geo-brasil-capi-normalizer' + '/' + 'data';
 const OUTPUT_TYPE = data.outputType;
 const CACHE_ENABLED = data.enableCache;
 const CACHE_TTL = (data.cacheTtl || 86400) * 1000; // Padrão: 24 horas
