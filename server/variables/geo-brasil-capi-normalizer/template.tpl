@@ -145,8 +145,8 @@ ___TEMPLATE_PARAMETERS___
         "name": "cacheTtl",
         "displayName": "Cache TTL (segundos)",
         "simpleValueType": true,
-        "defaultValue": "3600",
-        "help": "Tempo de vida do cache em segundos. Padrão: 3600 (1 hora)",
+        "defaultValue": "86400",
+        "help": "Tempo de vida do cache em segundos. Padrão: 86400 (24 horas). Dados geográficos mudam raramente, cache longo é recomendado.",
         "enablingConditions": [
           {
             "paramName": "enableCache",
@@ -284,7 +284,7 @@ const logToConsole = require('logToConsole');
 const CDN_BASE_URL = data.cdnBaseUrl;
 const OUTPUT_TYPE = data.outputType;
 const CACHE_ENABLED = data.enableCache;
-const CACHE_TTL = (data.cacheTtl || 3600) * 1000;
+const CACHE_TTL = (data.cacheTtl || 86400) * 1000; // Padrão: 24 horas
 const CITY_MODE = data.cityNormalizationMode || 'algorithmic';
 const DEBUG = data.enableDebug;
 const CDN_TIMEOUT = data.cdnTimeout || 2000;
@@ -379,11 +379,27 @@ const normalizar = function(texto) {
   return result.toLowerCase().split(' ').join('').replace(/[^a-z0-9]/g, '');
 };
 
-const processarComDados = function(city, state, country, estadosData, paisesData) {
+const processarComDados = function(city, state, country, estadosData, paisesData, cidadesData) {
   log('Processando dados geográficos', { city: city, state: state, country: country });
 
   // Normaliza cidade
-  const cityNorm = CITY_MODE === 'algorithmic' ? normalizar(city) : city.toLowerCase().trim();
+  var cityNorm;
+  if (cidadesData && city) {
+    // Tenta buscar no mapeamento de cidades
+    const cityLower = city.toLowerCase().trim();
+    cityNorm = cidadesData[cityLower];
+
+    if (!cityNorm) {
+      // Se não encontrou no mapeamento, usa normalização algorítmica
+      cityNorm = CITY_MODE === 'algorithmic' ? normalizar(city) : cityLower;
+      log('Cidade não encontrada no mapeamento, usando fallback', { city: city, normalized: cityNorm });
+    } else {
+      log('Cidade encontrada no mapeamento', { city: city, normalized: cityNorm });
+    }
+  } else {
+    // Sem mapeamento de cidades, usa normalização algorítmica
+    cityNorm = CITY_MODE === 'algorithmic' ? normalizar(city) : city.toLowerCase().trim();
+  }
 
   // Processa estado
   const stateUpper = state ? state.toUpperCase() : '';
@@ -468,14 +484,18 @@ if (CACHE_ENABLED) {
 
 const estadosCacheKey = 'geo_cdn_estados';
 const paisesCacheKey = 'geo_cdn_paises';
+const stateUpper = state ? state.toUpperCase() : '';
+const cidadesCacheKey = 'geo_cdn_cidades_' + stateUpper;
 
 // Verifica cache dos JSONs do CDN
 var estadosData = null;
 var paisesData = null;
+var cidadesData = null;
 
 if (CACHE_ENABLED) {
   const cachedEstados = templateStorage.getItem(estadosCacheKey);
   const cachedPaises = templateStorage.getItem(paisesCacheKey);
+  const cachedCidades = templateStorage.getItem(cidadesCacheKey);
 
   if (cachedEstados && (now - cachedEstados.timestamp) < CACHE_TTL) {
     estadosData = cachedEstados.data;
@@ -486,12 +506,17 @@ if (CACHE_ENABLED) {
     paisesData = cachedPaises.data;
     log('Cache HIT (paises)');
   }
+
+  if (cachedCidades && (now - cachedCidades.timestamp) < CACHE_TTL) {
+    cidadesData = cachedCidades.data;
+    log('Cache HIT (cidades do estado ' + stateUpper + ')');
+  }
 }
 
 // Se tem tudo em cache, processa e retorna
-if (estadosData && paisesData) {
-  log('Usando dados do cache CDN');
-  const result = processarComDados(city, state, country, estadosData, paisesData);
+if (estadosData && paisesData && cidadesData) {
+  log('Usando dados do cache CDN (completo)');
+  const result = processarComDados(city, state, country, estadosData, paisesData, cidadesData);
 
   if (CACHE_ENABLED) {
     templateStorage.setItem(resultCacheKey, {
@@ -509,14 +534,16 @@ log('Buscando mapeamentos do jsDelivr');
 // URLs dos JSONs
 const estadosUrl = CDN_BASE_URL + '/' + 'estados.json';
 const paisesUrl = CDN_BASE_URL + '/' + 'paises.json';
+const cidadesUrl = stateUpper ? (CDN_BASE_URL + '/' + 'cidades-' + stateUpper.toLowerCase() + '.json') : null;
 
-// Contador para sincronizar as duas requisições
+// Contador para sincronizar as requisições (3 ou 2 dependendo se tem cidades)
+const totalRequests = cidadesUrl ? 3 : 2;
 var requestsCompleted = 0;
 var hasError = false;
 
-// Função para processar quando ambas requisições terminarem
+// Função para processar quando todas requisições terminarem
 const processarQuandoPronto = function() {
-  if (requestsCompleted < 2) return;
+  if (requestsCompleted < totalRequests) return;
 
   // Se houve erro, usa fallback
   if (hasError || !estadosData || !paisesData) {
@@ -525,8 +552,11 @@ const processarQuandoPronto = function() {
     paisesData = PAISES_FALLBACK;
   }
 
+  // cidadesData pode ser null se não existe JSON para o estado
+  // ou se falhou ao carregar (usa fallback algorítmico)
+
   // Processa os dados
-  const result = processarComDados(city, state, country, estadosData, paisesData);
+  const result = processarComDados(city, state, country, estadosData, paisesData, cidadesData);
 
   // Salva no cache
   if (CACHE_ENABLED) {
@@ -540,7 +570,17 @@ const processarQuandoPronto = function() {
         data: paisesData,
         timestamp: now
       });
-      log('JSONs do CDN salvos no cache');
+
+      // Salva cidades no cache (se carregou)
+      if (cidadesData) {
+        templateStorage.setItem(cidadesCacheKey, {
+          data: cidadesData,
+          timestamp: now
+        });
+        log('JSONs do CDN salvos no cache (incluindo cidades)');
+      } else {
+        log('JSONs do CDN salvos no cache (sem cidades)');
+      }
     }
 
     // Salva o resultado no cache
@@ -613,6 +653,47 @@ if (!paisesData) {
     timeout: CDN_TIMEOUT
   });
 } else {
+  requestsCompleted++;
+}
+
+// Busca cidades-{uf}.json (se houver estado)
+if (cidadesUrl && !cidadesData) {
+  log('Buscando cidades do estado ' + stateUpper, { url: cidadesUrl });
+  sendHttpRequest(cidadesUrl, function(statusCode, headers, body) {
+    requestsCompleted++;
+
+    if (statusCode === 200) {
+      try {
+        const parsed = JSON.parse(body);
+        // Remove _meta
+        delete parsed._meta;
+        cidadesData = parsed;
+        log('Cidades do estado ' + stateUpper + ' carregadas com sucesso');
+      } catch (e) {
+        log('Erro ao parsear cidades-' + stateUpper.toLowerCase() + '.json', { error: e });
+        // Não marca como hasError porque cidades é opcional (fallback algorítmico)
+        cidadesData = null;
+      }
+    } else if (statusCode === 404) {
+      // JSON de cidades não existe para esse estado, usa fallback algorítmico
+      log('JSON de cidades não existe para o estado ' + stateUpper + ', usando fallback');
+      cidadesData = null;
+    } else {
+      log('Erro ao buscar cidades-' + stateUpper.toLowerCase() + '.json', { statusCode: statusCode });
+      // Não marca como hasError porque cidades é opcional
+      cidadesData = null;
+    }
+
+    return processarQuandoPronto();
+  }, {
+    method: 'GET',
+    timeout: CDN_TIMEOUT
+  });
+} else if (!cidadesUrl) {
+  // Não há estado, pula cidades
+  requestsCompleted++;
+} else {
+  // cidadesData já está em cache
   requestsCompleted++;
 }
 
