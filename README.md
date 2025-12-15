@@ -10,6 +10,7 @@ Coleção de templates customizados para Google Tag Manager desenvolvidos pela [
 |----------|-----------|--------------|
 | **Behiivee Iframe Tracker** | Rastreamento de eventos em embeds do Behiivee (newsletter) | [📖 Ver docs](./client/tags/behiivee-iframe-tracker/README.md) |
 | **Dedup Transaction ID** | Previne duplicação de eventos de compra/transação | [📖 Ver docs](./client/tags/dedup-transaction-id/README.md) |
+| **EqualWeb Accessibility** | Widget de acessibilidade EqualWeb com tracking de 45+ interações | [📖 Ver docs](./client/tags/equalweb/README.md) |
 | **GA4 Identity Hub** | Gerenciamento centralizado de client_id e session_id do GA4 | [📖 Ver docs](./client/tags/ga4-identity-hub/README.md) |
 | **Iframe Tracker** | Rastreamento de eventos em iframes (ex: Adsense) | [📖 Ver docs](./client/tags/iframe-tracker/README.md) |
 | **Panda Video** | Listener de eventos para player Panda Video | [📖 Ver docs](./client/tags/panda-video/README.md) |
@@ -67,13 +68,16 @@ gtm-templates/
 ### Templates com Build
 
 Alguns templates possuem JavaScript injetado que requer build:
-- behiivee-iframe-tracker
-- iframe-tracker
-- panda-video
+- **behiivee-iframe-tracker** - Tracking de eventos em iframes Behiivee
+- **equalweb** - Script de tracking de interações de acessibilidade
+- **iframe-tracker** - Tracking de eventos em iframes genéricos
+- **panda-video** - Tracking de eventos do player Panda Video
 
-Para estes templates:
+Para estes templates, navegue até a pasta `inject-script/` do template:
 
 ```bash
+cd client/tags/[nome-do-template]/inject-script/
+
 # Instalar dependências
 pnpm install
 
@@ -82,6 +86,17 @@ pnpm run build
 
 # Deploy para AWS S3 (requer configuração .env)
 pnpm run deploy
+```
+
+#### Configuração do .env
+
+Crie um arquivo `.env` na pasta `inject-script/` com suas credenciais AWS:
+
+```env
+AWS_ACCESS_KEY_ID=sua_chave
+AWS_SECRET_ACCESS_KEY=sua_secret
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=seu-bucket
 ```
 
 ### Contribuindo
