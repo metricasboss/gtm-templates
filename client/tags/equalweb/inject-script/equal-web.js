@@ -140,18 +140,30 @@
   // ===========================================================================
   
   function interceptMethod(obj, methodName, trackingInfo, additionalHandler) {
-    if (!obj || typeof obj[methodName] !== 'function') {
-      log('Método não encontrado:', methodName);
+    if (!obj) {
+      if (settings.debug) log('Objeto null/undefined ao tentar interceptar:', methodName);
       return false;
     }
-    
+
+    if (typeof obj[methodName] !== 'function') {
+      if (settings.debug) log('Método não é função:', methodName, '(tipo:', typeof obj[methodName], ')');
+      return false;
+    }
+
+    // Verifica se já foi interceptado
+    if (obj[methodName].__ewIntercepted) {
+      if (settings.debug) log('Método já interceptado:', methodName);
+      return false;
+    }
+
     var original = obj[methodName];
-    
-    obj[methodName] = function() {
+
+    // Cria função wrapper
+    var wrappedFunction = function() {
       var args = Array.prototype.slice.call(arguments);
       var value = args[0];
       var label = trackingInfo.name;
-      
+
       // Monta label com valor quando aplicável
       if (value !== undefined && value !== null && value !== '') {
         // Para esquemas de cores, traduz os valores
@@ -163,18 +175,18 @@
           'lowHue': 'Baixo Contraste',
           'soundreder': 'Leitor Sonoro'
         };
-        
+
         var displayValue = valueMap[value] || value;
         label = trackingInfo.name + ': ' + displayValue;
       }
-      
+
       // Determina se está ativando ou desativando
       var isDeactivating = false;
       if (window.interdeal && window.interdeal.mode) {
         var modeKey = 'IND' + methodName.replace('set', '');
         isDeactivating = !!window.interdeal.mode[modeKey];
       }
-      
+
       pushToDataLayer(
         methodName,
         trackingInfo.category,
@@ -185,62 +197,110 @@
           method: methodName
         }
       );
-      
+
       // Handler adicional se fornecido
       if (typeof additionalHandler === 'function') {
         additionalHandler(methodName, args, trackingInfo);
       }
-      
+
       // Executa método original
       return original.apply(this, args);
     };
-    
-    log('Método interceptado:', methodName);
+
+    // Marca como interceptado
+    wrappedFunction.__ewIntercepted = true;
+    wrappedFunction.__ewOriginal = original;
+
+    // Substitui o método (sem travar, para não dar erro)
+    obj[methodName] = wrappedFunction;
+
+    log('✓ Método interceptado:', methodName);
     return true;
   }
   
+  function findMethodLocation(interdeal, methodName) {
+    // Tenta encontrar o método em diferentes locais
+    var locations = [
+      { obj: interdeal, path: 'interdeal' },
+      { obj: interdeal.a11y, path: 'interdeal.a11y' },
+      { obj: interdeal.API, path: 'interdeal.API' }
+    ];
+
+    for (var i = 0; i < locations.length; i++) {
+      var loc = locations[i];
+      if (loc.obj && typeof loc.obj[methodName] === 'function') {
+        if (settings.debug) log('Método', methodName, 'encontrado em', loc.path);
+        return loc;
+      }
+    }
+
+    return null;
+  }
+
   function setupAllInterceptors(interdeal) {
     var interceptedCount = 0;
-    
-    // Intercepta perfis
+    var notFoundCount = 0;
+    var notFoundMethods = [];
+
+    log('Iniciando interceptação de métodos...');
+
+    // Coleta todos os métodos a serem interceptados
+    var allMethods = [];
+
     if (settings.trackProfiles) {
       for (var profile in TRACKING_MAP.profiles) {
         if (TRACKING_MAP.profiles.hasOwnProperty(profile)) {
-          if (interceptMethod(interdeal, profile, TRACKING_MAP.profiles[profile])) {
-            interceptedCount++;
-          }
+          allMethods.push({ name: profile, info: TRACKING_MAP.profiles[profile] });
         }
       }
     }
-    
-    // Intercepta recursos de leitura
+
     if (settings.trackFeatures) {
       var featureGroups = ['reading', 'visual', 'cursor', 'navigation', 'media', 'safety'];
-      
       featureGroups.forEach(function(group) {
         var features = TRACKING_MAP[group];
         for (var feature in features) {
           if (features.hasOwnProperty(feature)) {
-            if (interceptMethod(interdeal, feature, features[feature])) {
-              interceptedCount++;
-            }
+            allMethods.push({ name: feature, info: features[feature] });
           }
         }
       });
     }
-    
-    // Intercepta controles do menu
+
     if (settings.trackMenuActions) {
       for (var menuAction in TRACKING_MAP.menu) {
         if (TRACKING_MAP.menu.hasOwnProperty(menuAction)) {
-          if (interceptMethod(interdeal, menuAction, TRACKING_MAP.menu[menuAction])) {
-            interceptedCount++;
-          }
+          allMethods.push({ name: menuAction, info: TRACKING_MAP.menu[menuAction] });
         }
       }
     }
-    
-    log('Total de métodos interceptados:', interceptedCount);
+
+    log('Total de métodos para interceptar:', allMethods.length);
+
+    // Tenta interceptar cada método
+    allMethods.forEach(function(method) {
+      var location = findMethodLocation(interdeal, method.name);
+
+      if (location) {
+        if (interceptMethod(location.obj, method.name, method.info)) {
+          interceptedCount++;
+        }
+      } else {
+        notFoundCount++;
+        notFoundMethods.push(method.name);
+      }
+    });
+
+    log('✓ Total de métodos interceptados:', interceptedCount);
+
+    if (notFoundCount > 0) {
+      log('⚠ Métodos não encontrados:', notFoundCount);
+      if (settings.debug && notFoundMethods.length > 0) {
+        log('Lista de métodos não encontrados:', notFoundMethods.slice(0, 10).join(', '),
+            notFoundMethods.length > 10 ? '...' : '');
+      }
+    }
+
     return interceptedCount;
   }
   
@@ -382,13 +442,58 @@
     log('Inicializando tracking...');
     log('Versão EqualWeb:', interdeal.version);
     log('Sitekey:', interdeal.sitekey);
-    
+
     // Configura interceptadores
     var interceptedCount = setupAllInterceptors(interdeal);
-    
+
+    // Se interceptou muito poucos métodos, tenta novamente depois
+    if (interceptedCount < 10) {
+      log('⚠ Poucos métodos interceptados. Tentando novamente em 2 segundos...');
+      setTimeout(function() {
+        log('Tentativa adicional de interceptação...');
+        var newCount = setupAllInterceptors(interdeal);
+        log('Métodos adicionais interceptados:', newCount - interceptedCount);
+      }, 2000);
+    }
+
+    // INTERCEPTAÇÃO TARDIA - após tudo carregar
+    // O EqualWeb pode recriar métodos após inicialização
+    setTimeout(function() {
+      log('Verificando interceptações após carregamento completo...');
+      var reInterceptedCount = setupAllInterceptors(interdeal);
+      if (reInterceptedCount > interceptedCount) {
+        log('✓ Métodos adicionais interceptados:', reInterceptedCount - interceptedCount);
+      }
+    }, 3000);
+
+    // MONITORAMENTO CONTÍNUO DE SOBRESCRITA
+    // Verifica periodicamente se o EqualWeb sobrescreveu os métodos
+    var checkInterval = setInterval(function() {
+      var testMethods = ['setTextReader', 'setDyslexia', 'ShowMenu', 'setZoom'];
+      var overwritten = 0;
+
+      testMethods.forEach(function(method) {
+        if (interdeal[method] && !interdeal[method].__ewIntercepted) {
+          if (settings.debug) log('⚠ Método', method, 'foi sobrescrito, reinterceptando...');
+          overwritten++;
+        }
+      });
+
+      if (overwritten > 0) {
+        var newCount = setupAllInterceptors(interdeal);
+        if (settings.debug) log('Reinterceptados:', newCount, 'métodos');
+      }
+    }, 2000); // Verifica a cada 2 segundos
+
+    // Para após 30 segundos (15 verificações)
+    setTimeout(function() {
+      clearInterval(checkInterval);
+      if (settings.debug) log('Monitoramento de sobrescrita finalizado');
+    }, 30000);
+
     // Configura tracking de eventos DOM
     setupDOMTracking(interdeal);
-    
+
     // Evento de inicialização
     if (settings.trackWidgetLoad) {
       pushToDataLayer(
@@ -405,7 +510,7 @@
         }
       );
     }
-    
+
     log('Tracking inicializado com sucesso');
   }
   
