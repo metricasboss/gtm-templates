@@ -11,6 +11,7 @@ Coleção de templates customizados para Google Tag Manager desenvolvidos pela [
 | **Behiivee Iframe Tracker** | Rastreamento de eventos em embeds do Behiivee (newsletter) | [📖 Ver docs](./client/tags/behiivee-iframe-tracker/README.md) |
 | **Dedup Transaction ID** | Previne duplicação de eventos de compra/transação | [📖 Ver docs](./client/tags/dedup-transaction-id/README.md) |
 | **EqualWeb Accessibility** | Widget de acessibilidade EqualWeb com tracking de 45+ interações | [📖 Ver docs](./client/tags/equalweb/README.md) |
+| **Form Funnel Tracker** | Rastreamento campo a campo de formulários com análise de funil de conversão | [📖 Ver docs](./client/tags/form-funnel-tracker/README.md) |
 | **GA4 Identity Hub** | Gerenciamento centralizado de client_id e session_id do GA4 | [📖 Ver docs](./client/tags/ga4-identity-hub/README.md) |
 | **Iframe Tracker** | Rastreamento de eventos em iframes (ex: Adsense) | [📖 Ver docs](./client/tags/iframe-tracker/README.md) |
 | **Panda Video** | Listener de eventos para player Panda Video | [📖 Ver docs](./client/tags/panda-video/README.md) |
