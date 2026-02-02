@@ -14,6 +14,223 @@ O **Form Funnel Tracker** é um template GTM que monitora cada interação do us
 
 Ideal para otimizar formulários de checkout, cadastro, contato, lead generation e qualquer outro tipo de formulário.
 
+## 📊 Tipos de Eventos Rastreados
+
+O Form Funnel Tracker monitora **5 tipos de interações** com formulários. Entenda cada uma:
+
+| Evento | O que é? | Quando dispara? | Exemplo Prático | Use para... |
+|--------|----------|-----------------|-----------------|-------------|
+| **🎯 Focus** | Usuário **clica ou navega** (Tab) para um campo | Quando o cursor entra no campo ou o campo é selecionado via teclado | Você clica no campo "E-mail" para começar a digitar | • Identificar campos que atraem atenção mas não são preenchidos<br>• Calcular taxa de abandono por campo<br>• Entender ordem de preenchimento |
+| **👋 Blur** | Usuário **sai do campo** (clica fora ou aperta Tab) | Quando o cursor deixa o campo, independente de ter digitado algo | Você digita seu e-mail e clica no próximo campo | • Medir tempo gasto em cada campo<br>• Identificar campos que causam confusão<br>• Detectar hesitação do usuário |
+| **✏️ Change** | **Valor do campo foi alterado** | Após o blur, se o valor foi modificado. Para select/checkbox/radio dispara imediatamente | Você digita "joao@email.com" e passa para o próximo campo | • Confirmar que campo foi realmente preenchido<br>• Distinguir entre "apenas olhou" vs "preencheu"<br>• Validar engajamento real |
+| **⚡ Autocomplete** | Navegador **preencheu automaticamente** o campo | Detecta quando campo é preenchido sem o usuário estar focado nele | Chrome preenche automaticamente seu nome/endereço | • Entender quantos usam autocomplete<br>• Ajustar análise de tempo (autocomplete é instantâneo)<br>• Identificar campos que facilitam conversão |
+| **🚀 Submit** | Usuário **enviou o formulário** | Quando botão submit é clicado ou Enter é pressionado | Você clica no botão "Finalizar Compra" | • Calcular taxa de conclusão<br>• Medir conversão final<br>• Criar funil completo (início → fim) |
+
+### 🔍 Detalhamento: Como Cada Evento Funciona
+
+#### 1️⃣ Focus (Foco)
+**Gatilho**: Evento JavaScript `focus`
+
+**O que significa?**
+- Usuário **começou a interagir** com o campo
+- Pode ser via mouse (clique) ou teclado (Tab)
+- Campo está "ativo" e pronto para receber input
+
+**Exemplo de jornada**:
+```
+1. Usuário vê formulário
+2. Clica no campo "Nome" → 🎯 FOCUS dispara
+3. Cursor pisca no campo, esperando digitação
+```
+
+**Dados capturados**:
+```javascript
+{
+  event: 'form_funnel_focus',
+  field_id: 'nome',
+  field_value_length: 0,  // Ainda vazio
+  form_progress: 0        // 0% preenchido
+}
+```
+
+**⚠️ Importante**: Focus NÃO significa que o usuário digitou algo, apenas que o campo recebeu atenção.
+
+---
+
+#### 2️⃣ Blur (Desfoque)
+**Gatilho**: Evento JavaScript `blur`
+
+**O que significa?**
+- Usuário **saiu do campo** (removeu o foco)
+- Pode ter digitado algo ou não
+- Campo não está mais ativo
+
+**Exemplo de jornada**:
+```
+1. Campo "E-mail" está com focus
+2. Usuário digita "joao@example.com"
+3. Usuário clica no próximo campo → 👋 BLUR dispara
+```
+
+**Dados capturados**:
+```javascript
+{
+  event: 'form_funnel_blur',
+  field_id: 'email',
+  field_value_length: 18,  // "joao@example.com" = 18 caracteres
+  form_progress: 25        // 25% do formulário preenchido
+}
+```
+
+**📏 Cálculo de tempo**:
+Diferença entre `blur` e `focus` do mesmo campo = tempo gasto no campo
+
+**Use para identificar**:
+- Campos que tomam muito tempo (possível dificuldade)
+- Campos abandonados rapidamente (possível confusão)
+
+---
+
+#### 3️⃣ Change (Alteração)
+**Gatilho**: Evento JavaScript `change`
+
+**O que significa?**
+- **Valor do campo foi modificado** de fato
+- Para inputs de texto: dispara após blur (quando sai do campo)
+- Para select/checkbox/radio: dispara imediatamente ao selecionar
+
+**Diferença Focus vs Change**:
+- **Focus**: "Olhou para o campo" (pode estar vazio)
+- **Change**: "Modificou o valor" (definitivamente preenchido)
+
+**Exemplo de jornada**:
+```
+1. Campo "Telefone" recebe focus
+2. Usuário digita "(11) 99999-9999"
+3. Usuário sai do campo (blur)
+4. → ✏️ CHANGE dispara (valor foi alterado)
+```
+
+**Dados capturados**:
+```javascript
+{
+  event: 'form_funnel_change',
+  field_id: 'telefone',
+  field_value_length: 16,  // "(11) 99999-9999" = 16 caracteres
+  form_progress: 50        // 50% do formulário preenchido
+}
+```
+
+**⚠️ Casos especiais**:
+- **Select**: Change dispara ao selecionar opção (não precisa blur)
+- **Checkbox**: Change dispara ao marcar/desmarcar
+- **Radio**: Change dispara ao selecionar opção
+
+---
+
+#### 4️⃣ Autocomplete (Preenchimento Automático)
+**Gatilho**: Detecção customizada via `input` event
+
+**O que significa?**
+- Navegador **preencheu automaticamente** o campo
+- Usuário não digitou manualmente
+- Campo foi preenchido "instantaneamente"
+
+**Como funciona a detecção**:
+```javascript
+// Lógica interna do tracker:
+1. Campo recebe valor via evento 'input'
+2. Aguarda 100ms
+3. Se campo tem valor MAS usuário não está focado nele
+   → É autocomplete! ⚡ AUTOCOMPLETE dispara
+```
+
+**Exemplo de jornada**:
+```
+1. Usuário clica em "Nome"
+2. Chrome pergunta: "Preencher com João Silva?"
+3. Usuário clica "Sim"
+4. Múltiplos campos são preenchidos instantaneamente
+   → ⚡ AUTOCOMPLETE dispara para cada um
+```
+
+**Dados capturados**:
+```javascript
+{
+  event: 'form_funnel_autocomplete',
+  field_id: 'nome',
+  field_value_length: 10,  // "João Silva" = 10 caracteres
+  form_progress: 75        // 75% preenchido via autocomplete
+}
+```
+
+**📊 Impacto na análise**:
+- Usuários com autocomplete preenchem **muito mais rápido**
+- Pode distorcer médias de "tempo por campo"
+- Use para criar segmentos: "Com autocomplete" vs "Sem autocomplete"
+
+---
+
+#### 5️⃣ Submit (Envio)
+**Gatilho**: Evento JavaScript `submit`
+
+**O que significa?**
+- Usuário **enviou o formulário**
+- Pode ser via botão "Enviar" ou tecla Enter
+- Formulário está sendo processado
+
+**Exemplo de jornada**:
+```
+1. Usuário preenche todos os campos
+2. Clica no botão "Finalizar Compra"
+3. → 🚀 SUBMIT dispara
+4. Formulário é enviado ao servidor
+```
+
+**Dados capturados**:
+```javascript
+{
+  event: 'form_funnel_submit',
+  form_id: 'checkout-form',
+  form_progress: 100,      // 100% preenchido
+  timestamp: 1738051260000
+}
+```
+
+**⚠️ Nota**: Evento submit NÃO inclui dados de campos individuais, apenas do formulário como um todo.
+
+**Use para calcular**:
+- **Taxa de conclusão**: `(Submits / Focus únicos) * 100`
+- **Tempo total**: Diferença entre primeiro focus e submit
+- **Abandono por etapa**: Onde usuários param antes de submeter
+
+---
+
+### 🎯 Combinando Eventos para Análises Avançadas
+
+#### Exemplo 1: Taxa de Abandono por Campo
+```
+Campos com Focus mas sem Change = Campos que causam abandono
+```
+
+#### Exemplo 2: Tempo Médio por Campo
+```
+Tempo = Blur timestamp - Focus timestamp
+```
+
+#### Exemplo 3: Efetividade do Autocomplete
+```
+Taxa de conversão com autocomplete vs sem autocomplete
+```
+
+#### Exemplo 4: Funil Completo
+```
+Focus (100%) → Change (80%) → Submit (60%)
+     ↓20% abandonam        ↓20% abandonam
+```
+
+---
+
 ## 🔧 Build e Deploy (Desenvolvedores)
 
 Este template utiliza JavaScript externo hospedado no AWS S3. **Se você é usuário final**, pode pular esta seção e ir direto para [Como Testar](#-como-testar-início-rápido).
@@ -515,29 +732,259 @@ Crie as seguintes variáveis do tipo **Variável da camada de dados**:
 | DLV - Field Value Length | `field_value_length` |
 | DLV - Form Progress | `form_progress` |
 
-### Passo 2: Criar Acionadores
+### Passo 2: Criar Acionadores (Triggers)
 
-Crie acionadores do tipo **Evento personalizado** para cada tipo de evento:
+Os acionadores determinam **quando** suas tags devem disparar. Você pode criar triggers genéricos (para todos os eventos) ou específicos (para casos de uso avançados).
 
-#### Acionador: Form Funnel - Focus
-- **Tipo**: Evento personalizado
-- **Nome do evento**: `form_funnel_focus`
+#### 📌 Opção 1: Triggers Genéricos (Recomendado para Começar)
 
-#### Acionador: Form Funnel - Blur
-- **Tipo**: Evento personalizado
-- **Nome do evento**: `form_funnel_blur`
+Crie 5 acionadores básicos, um para cada tipo de evento:
 
-#### Acionador: Form Funnel - Change
-- **Tipo**: Evento personalizado
-- **Nome do evento**: `form_funnel_change`
+---
 
-#### Acionador: Form Funnel - Submit
-- **Tipo**: Evento personalizado
-- **Nome do evento**: `form_funnel_submit`
+#### 🎯 Acionador: Form Funnel - Focus
 
-#### Acionador: Form Funnel - Autocomplete
-- **Tipo**: Evento personalizado
-- **Nome do evento**: `form_funnel_autocomplete`
+**Quando usar**: Rastrear quando usuários **começam** a interagir com campos.
+
+**Configuração**:
+1. Vá em **Acionadores** → **Novo**
+2. Clique em **Configuração do acionador**
+3. Selecione **Evento personalizado**
+4. Configure:
+   - **Nome do evento**: `form_funnel_focus`
+   - **Este acionador é disparado em**: `Todos os eventos personalizados`
+
+**Casos de uso**:
+- ✅ Enviar todos os eventos de focus para GA4
+- ✅ Criar relatório de "campos mais focados"
+- ✅ Identificar ordem de preenchimento
+
+**Exemplo de filtro avançado** (se quiser rastrear apenas campos específicos):
+```
+Nome do evento = form_funnel_focus
+E
+{{DLV - Field ID}} corresponde a RegEx: email|phone|name
+```
+↑ Rastreia focus apenas em campos de e-mail, telefone e nome.
+
+---
+
+#### 👋 Acionador: Form Funnel - Blur
+
+**Quando usar**: Rastrear quando usuários **saem** dos campos (útil para calcular tempo).
+
+**Configuração**:
+1. Vá em **Acionadores** → **Novo**
+2. Clique em **Configuração do acionador**
+3. Selecione **Evento personalizado**
+4. Configure:
+   - **Nome do evento**: `form_funnel_blur`
+   - **Este acionador é disparado em**: `Todos os eventos personalizados`
+
+**Casos de uso**:
+- ✅ Calcular tempo gasto em cada campo
+- ✅ Identificar campos que causam hesitação
+- ✅ Detectar campos abandonados vazios
+
+**Exemplo de filtro avançado** (rastrear apenas blur com valor preenchido):
+```
+Nome do evento = form_funnel_blur
+E
+{{DLV - Field Value Length}} maior que 0
+```
+↑ Ignora blur em campos vazios (usuário só olhou, não preencheu).
+
+---
+
+#### ✏️ Acionador: Form Funnel - Change
+
+**Quando usar**: Rastrear quando campos são **efetivamente alterados** (confirmação de preenchimento).
+
+**Configuração**:
+1. Vá em **Acionadores** → **Novo**
+2. Clique em **Configuração do acionador**
+3. Selecione **Evento personalizado**
+4. Configure:
+   - **Nome do evento**: `form_funnel_change`
+   - **Este acionador é disparado em**: `Todos os eventos personalizados`
+
+**Casos de uso**:
+- ✅ Confirmar que campo foi realmente preenchido
+- ✅ Rastrear progresso real do formulário
+- ✅ Ignorar campos que usuário apenas focou mas não preencheu
+
+**Exemplo de filtro avançado** (rastrear apenas campos obrigatórios):
+```
+Nome do evento = form_funnel_change
+E
+{{DLV - Field ID}} corresponde a RegEx: email|phone|address|payment_method
+```
+↑ Rastreia change apenas em campos críticos do checkout.
+
+---
+
+#### 🚀 Acionador: Form Funnel - Submit
+
+**Quando usar**: Rastrear quando formulário é **enviado** (conversão final).
+
+**Configuração**:
+1. Vá em **Acionadores** → **Novo**
+2. Clique em **Configuração do acionador**
+3. Selecione **Evento personalizado**
+4. Configure:
+   - **Nome do evento**: `form_funnel_submit`
+   - **Este acionador é disparado em**: `Todos os eventos personalizados`
+
+**Casos de uso**:
+- ✅ Calcular taxa de conclusão
+- ✅ Medir conversão
+- ✅ Criar funil completo (focus → submit)
+
+**Exemplo de filtro avançado** (rastrear apenas submit de formulários específicos):
+```
+Nome do evento = form_funnel_submit
+E
+{{DLV - Form ID}} corresponde a RegEx: checkout|contact|lead
+```
+↑ Rastreia submit apenas dos formulários principais.
+
+---
+
+#### ⚡ Acionador: Form Funnel - Autocomplete
+
+**Quando usar**: Rastrear quando campos são **preenchidos automaticamente** pelo navegador.
+
+**Configuração**:
+1. Vá em **Acionadores** → **Novo**
+2. Clique em **Configuração do acionador**
+3. Selecione **Evento personalizado**
+4. Configure:
+   - **Nome do evento**: `form_funnel_autocomplete`
+   - **Este acionador é disparado em**: `Todos os eventos personalizados`
+
+**Casos de uso**:
+- ✅ Identificar taxa de uso de autocomplete
+- ✅ Comparar conversão: com vs sem autocomplete
+- ✅ Ajustar análises de tempo (autocomplete é instantâneo)
+
+**Exemplo de filtro avançado** (rastrear autocomplete apenas em checkout):
+```
+Nome do evento = form_funnel_autocomplete
+E
+{{DLV - Form ID}} igual a checkout-form
+```
+↑ Rastreia autocomplete apenas no formulário de checkout.
+
+---
+
+#### 📌 Opção 2: Triggers Avançados (Casos de Uso Específicos)
+
+Para análises mais granulares, você pode criar triggers com condições específicas:
+
+##### 🔥 Trigger: Campos de Alta Prioridade
+
+**Objetivo**: Rastrear apenas campos críticos (e-mail, telefone, pagamento).
+
+**Configuração**:
+```
+Nome do evento = form_funnel_change
+E
+{{DLV - Field ID}} corresponde a RegEx: email|phone|cpf|card_number|payment_method
+```
+
+**Use para**:
+- Reduzir volume de eventos (apenas campos importantes)
+- Focar em campos que impactam conversão
+
+---
+
+##### ⏱️ Trigger: Campos com Tempo Elevado
+
+**Objetivo**: Rastrear blur apenas em campos onde usuário passou muito tempo.
+
+**Configuração**:
+```
+Nome do evento = form_funnel_blur
+E
+{{DLV - Field Value Length}} maior que 5
+```
+↑ Assume que campos com mais de 5 caracteres tiveram mais tempo investido.
+
+**Use para**:
+- Identificar campos complexos
+- Detectar campos que causam dúvidas
+
+---
+
+##### 🎯 Trigger: Abandono em Campos Vazios
+
+**Objetivo**: Rastrear blur em campos que foram focados mas ficaram vazios.
+
+**Configuração**:
+```
+Nome do evento = form_funnel_blur
+E
+{{DLV - Field Value Length}} igual a 0
+```
+
+**Use para**:
+- Identificar campos que causam abandono
+- Detectar labels confusas ou validações problemáticas
+
+---
+
+##### 📊 Trigger: Progresso do Formulário
+
+**Objetivo**: Rastrear eventos apenas quando formulário atinge certo progresso.
+
+**Configuração**:
+```
+Nome do evento corresponde a RegEx: form_funnel_(focus|blur|change)
+E
+{{DLV - Form Progress}} maior que 50
+```
+
+**Use para**:
+- Rastrear apenas segunda metade do formulário
+- Identificar gargalos após 50% de preenchimento
+
+---
+
+##### 🚫 Trigger: Exclusão de Campos Sensíveis
+
+**Objetivo**: Garantir que campos sensíveis nunca sejam rastreados (segurança extra).
+
+**Configuração**:
+```
+Nome do evento corresponde a RegEx: form_funnel_.*
+E
+{{DLV - Field ID}} NÃO corresponde a RegEx: password|cvv|card.*|credit.*
+```
+
+**Use para**:
+- Camada extra de segurança
+- Compliance com políticas de privacidade
+
+---
+
+#### 🎓 Dicas de Boas Práticas
+
+1. **Comece simples**: Use os 5 triggers genéricos primeiro
+2. **Teste no Preview**: Sempre teste triggers no Preview Mode do GTM
+3. **Documente**: Adicione notas explicando cada trigger
+4. **Nomeie bem**: Use nomes claros como "Form Funnel - Focus | Apenas Checkout"
+5. **Monitore volume**: Triggers muito amplos geram muitos eventos (cuidado com limites do GA4)
+
+---
+
+#### 📈 Comparação: Triggers Genéricos vs Específicos
+
+| Abordagem | Vantagens | Desvantagens | Quando usar |
+|-----------|-----------|--------------|-------------|
+| **Genéricos** | • Simples de configurar<br>• Rastreia tudo<br>• Flexível | • Mais eventos<br>• Pode atingir limites GA4 | Começando, formulários pequenos |
+| **Específicos** | • Menos eventos<br>• Foco em campos críticos<br>• Otimizado | • Mais complexo<br>• Requer manutenção | Formulários grandes, otimização avançada |
+
+**Recomendação**: Comece com triggers genéricos. Depois de analisar dados, crie triggers específicos para otimizar.
 
 ### Passo 3: Criar Tag GA4
 
