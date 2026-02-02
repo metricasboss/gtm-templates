@@ -14,6 +14,87 @@ O **Form Funnel Tracker** é um template GTM que monitora cada interação do us
 
 Ideal para otimizar formulários de checkout, cadastro, contato, lead generation e qualquer outro tipo de formulário.
 
+## 🔧 Build e Deploy (Desenvolvedores)
+
+Este template utiliza JavaScript externo hospedado no AWS S3. **Se você é usuário final**, pode pular esta seção e ir direto para [Como Testar](#-como-testar-início-rápido).
+
+**Se você é desenvolvedor** e precisa modificar o JavaScript de tracking ou fazer deploy de uma nova versão:
+
+### Pré-requisitos
+
+- Node.js instalado (versão 16+)
+- pnpm instalado (`npm install -g pnpm`)
+- Credenciais AWS com acesso ao bucket S3
+
+### Configuração
+
+1. Navegue até a pasta `inject-script/`:
+
+```bash
+cd client/tags/form-funnel-tracker/inject-script/
+```
+
+2. Instale as dependências:
+
+```bash
+pnpm install
+```
+
+3. Crie um arquivo `.env` com suas credenciais AWS:
+
+```env
+AWS_ACCESS_KEY_ID=sua_chave_aqui
+AWS_SECRET_ACCESS_KEY=sua_secret_aqui
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=gtm-templates
+```
+
+### Build Local
+
+Para fazer build do JavaScript sem deploy:
+
+```bash
+pnpm run build
+```
+
+Isso irá:
+- Minificar o código
+- Gerar `dist/form-funnel-tracker-bundle.js`
+
+### Deploy para S3
+
+Para fazer build E deploy automático para o S3:
+
+```bash
+pnpm run deploy
+```
+
+Isso irá:
+- Fazer build do JavaScript
+- Fazer upload para `https://gtm-templates.s3.us-east-1.amazonaws.com/form-funnel-tracker-bundle.js`
+
+### Estrutura de Arquivos
+
+```
+inject-script/
+├── form-funnel-tracker.js    # Código-fonte do tracking
+├── package.json               # Dependências e scripts
+├── webpack.config.js          # Configuração de build
+├── .env                       # Credenciais AWS (gitignored)
+├── .gitignore                 # Ignora node_modules, dist, .env
+└── dist/                      # Build output (gitignored)
+    └── form-funnel-tracker-bundle.js
+```
+
+### Modificando o Código
+
+1. Edite `form-funnel-tracker.js` com suas alterações
+2. Faça build e teste localmente
+3. Quando estiver satisfeito, faça deploy para S3
+4. O template GTM automaticamente usará a nova versão
+
+---
+
 ## 🚀 Como Testar (Início Rápido)
 
 ### 1. Importar o Template no GTM
