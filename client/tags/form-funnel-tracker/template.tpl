@@ -166,7 +166,8 @@ ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 const injectScript = require('injectScript');
 const log = require('logToConsole');
 const JSON = require('JSON');
-const encodeUriComponent = require('encodeUriComponent');
+const callInWindow = require('callInWindow');
+const setInWindow = require('setInWindow');
 
 // Build configuration object from template parameters
 const config = {
@@ -189,15 +190,12 @@ if (config.enableDebug) {
   log('Form Funnel Tracker - Configuration:', config);
 }
 
-// Inject configuration script first
-const configScript = 'window.__formFunnelConfig = ' + JSON.stringify(config) + ';';
-const configDataUri = 'data:text/javascript;charset=utf-8,' + encodeUriComponent(configScript);
+// Set configuration in window using setInWindow
+setInWindow('__formFunnelConfig', config, true);
 
-// Inject config, then inject main script from S3
-injectScript(configDataUri, function() {
-  const scriptUrl = 'https://gtm-templates.s3.us-east-1.amazonaws.com/form-funnel-tracker-bundle.js';
-  injectScript(scriptUrl, data.gtmOnSuccess, data.gtmOnFailure);
-}, data.gtmOnFailure);
+// Inject main script from S3
+const scriptUrl = 'https://gtm-templates.s3.us-east-1.amazonaws.com/form-funnel-tracker-bundle.js';
+injectScript(scriptUrl, data.gtmOnSuccess, data.gtmOnFailure);
 
 
 ___WEB_PERMISSIONS___
@@ -274,6 +272,45 @@ ___WEB_PERMISSIONS___
                     "boolean": false
                   }
                 ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "key"
+                  },
+                  {
+                    "type": 1,
+                    "string": "read"
+                  },
+                  {
+                    "type": 1,
+                    "string": "write"
+                  },
+                  {
+                    "type": 1,
+                    "string": "execute"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "__formFunnelConfig"
+                  },
+                  {
+                    "type": 8,
+                    "boolean": true
+                  },
+                  {
+                    "type": 8,
+                    "boolean": true
+                  },
+                  {
+                    "type": 8,
+                    "boolean": false
+                  }
+                ]
               }
             ]
           }
@@ -297,10 +334,6 @@ ___WEB_PERMISSIONS___
           "value": {
             "type": 2,
             "listItem": [
-              {
-                "type": 1,
-                "string": "data:*"
-              },
               {
                 "type": 1,
                 "string": "https://gtm-templates.s3.us-east-1.amazonaws.com/form-funnel-tracker-bundle.js"
