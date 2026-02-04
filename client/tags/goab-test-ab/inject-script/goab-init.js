@@ -18,7 +18,7 @@
 
   goabObj = {
     accountId: config.accountId || '',
-    timeout: config.timeout || 1000,
+    timeout: config.timeout || 3000,
     version: config.version || '2.0.0',
     accountType: config.accountType || 'devs',
     debug: config.debug || false,

@@ -183,7 +183,7 @@ if (!data.accountId || data.accountId.trim() === '') {
 const accountType = 'devs';
 
 // Validar timeout
-let timeout = 1000; // padrão
+let timeout = 3000; // padrão (aumentado para dar tempo do script carregar)
 if (data.timeout !== undefined && data.timeout !== '') {
   timeout = makeNumber(data.timeout);
   if (!timeout || timeout < 0 || timeout > 10000) {
