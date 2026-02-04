@@ -157,13 +157,21 @@ const log = require('logToConsole');
 const getUrl = require('getUrl');
 const makeNumber = require('makeNumber');
 const encodeUriComponent = require('encodeUriComponent');
+const getTimestampMillis = require('getTimestampMillis');
 
 // ========================================
 // FUNÇÃO DE DEBUG
 // ========================================
 function debugLog(msg, obj) {
   if (data.enableDebug) {
-    log('[GoAB]', msg, obj !== undefined ? obj : '');
+    const now = getTimestampMillis();
+    const date = new Date(now);
+    const hours = ('0' + date.getHours()).slice(-2);
+    const minutes = ('0' + date.getMinutes()).slice(-2);
+    const seconds = ('0' + date.getSeconds()).slice(-2);
+    const millis = ('00' + date.getMilliseconds()).slice(-3);
+    const timestamp = hours + ':' + minutes + ':' + seconds + '.' + millis;
+    log('[GoAB ' + timestamp + ']', msg, obj !== undefined ? obj : '');
   }
 }
 
