@@ -255,17 +255,6 @@ setInWindow('goab', goabInitObj, true);
 debugLog('Variáveis globais criadas (goab_code, goab)');
 
 // ========================================
-// APLICAR ANTI-FLICKER CSS (INLINE)
-// ========================================
-
-const createStyleElement = require('createStyleElement');
-
-const antiFlickerCss = 'body{opacity:0 !important;visibility:hidden !important}';
-createStyleElement(antiFlickerCss, 'goab-af');
-
-debugLog('Anti-flicker CSS aplicado');
-
-// ========================================
 // CONSTRUIR URL DO APPLICATION.JS
 // ========================================
 
@@ -298,50 +287,22 @@ if (userId) {
 
 const applicationUrl = scriptUrlParts.join('');
 
-debugLog('URL do application.js: ' + applicationUrl);
-
-// ========================================
-// CONFIGURAR TIMEOUT PARA REMOVER ANTI-FLICKER
-// ========================================
-
-const callLater = require('callLater');
-
-let antiFlickerRemoved = false;
-
-function removeAntiFlicker() {
-  if (!antiFlickerRemoved) {
-    antiFlickerRemoved = true;
-
-    // Sobrescrever com CSS que reverte o anti-flicker
-    const revertCss = '#goab-af{display:none !important;}body{opacity:1 !important;visibility:visible !important}';
-    createStyleElement(revertCss, 'goab-af-revert');
-
-    debugLog('Anti-flicker CSS removido (revertido)');
-  }
-}
-
-// Timeout fallback
-callLater(function() {
-  if (!antiFlickerRemoved) {
-    debugLog('Timeout atingido (' + timeout + 'ms), removendo anti-flicker');
-    removeAntiFlicker();
-  }
-}, timeout);
+debugLog('URL construída: ' + applicationUrl);
 
 // ========================================
 // INJETAR APPLICATION.JS DA GOAB
 // ========================================
 
+debugLog('Iniciando injeção do script...');
+
 injectScript(
   applicationUrl,
   function() {
-    debugLog('Script application.js carregado com sucesso');
-    removeAntiFlicker();
+    debugLog('Script application.js carregado com SUCESSO');
     data.gtmOnSuccess();
   },
   function() {
-    debugLog('Erro ao carregar application.js');
-    removeAntiFlicker();
+    debugLog('ERRO ao carregar application.js');
     data.gtmOnFailure();
   },
   'goabApplication'
