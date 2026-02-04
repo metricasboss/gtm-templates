@@ -436,34 +436,13 @@ ___WEB_PERMISSIONS___
   {
     "instance": {
       "key": {
-        "publicId": "access_cookies",
+        "publicId": "get_cookies",
         "versionId": "1"
       },
       "param": [
         {
-          "key": "keys",
-          "value": {
-            "type": 2,
-            "listItem": [
-              {
-                "type": 3,
-                "mapKey": [
-                  { "type": 1, "string": "name" },
-                  { "type": 1, "string": "domain" },
-                  { "type": 1, "string": "path" },
-                  { "type": 1, "string": "secure" },
-                  { "type": 1, "string": "session" }
-                ],
-                "mapValue": [
-                  { "type": 1, "string": "goab_uid" },
-                  { "type": 1, "string": "*" },
-                  { "type": 1, "string": "*" },
-                  { "type": 1, "string": "any" },
-                  { "type": 1, "string": "any" }
-                ]
-              }
-            ]
-          }
+          "key": "cookieAccess",
+          "value": { "type": 1, "string": "any" }
         }
       ]
     },
