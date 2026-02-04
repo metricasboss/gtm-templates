@@ -128,17 +128,19 @@
       }, this.timeout);
 
       // Polling para verificar se application.js criou/modificou window.goab
+      self.log('Iniciando polling (max checks: ' + maxChecks + ')');
       checkInterval = setInterval(function() {
         checksCount++;
 
         // Verificar se window.goab foi modificado pelo application.js
         // O application.js sobrescreve window.goab com seu próprio objeto
-        if (window.goab && window.goab !== self && typeof window.goab.version !== 'undefined') {
+        if (window.goab && window.goab !== self) {
           clearInterval(checkInterval);
-          self.log('Script application.js carregado e inicializado (detectado via polling)');
+          self.log('Script application.js detectado (check #' + checksCount + ')');
           self.removeAntiFlicker();
         } else if (checksCount >= maxChecks) {
           clearInterval(checkInterval);
+          self.log('Polling finalizado sem detectar application.js (' + checksCount + ' checks)');
         }
       }, 100);
 
