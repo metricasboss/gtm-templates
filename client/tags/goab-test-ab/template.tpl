@@ -199,7 +199,8 @@ debugLog('Configuração:', {
   accountId: data.accountId,
   accountType: accountType,
   timeout: timeout,
-  version: scriptVersion
+  version: scriptVersion,
+  debug: data.enableDebug
 });
 
 // ========================================
