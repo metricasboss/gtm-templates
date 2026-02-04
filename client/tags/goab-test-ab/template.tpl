@@ -165,12 +165,18 @@ const getTimestampMillis = require('getTimestampMillis');
 function debugLog(msg, obj) {
   if (data.enableDebug) {
     const now = getTimestampMillis();
-    const date = new Date(now);
-    const hours = ('0' + date.getHours()).slice(-2);
-    const minutes = ('0' + date.getMinutes()).slice(-2);
-    const seconds = ('0' + date.getSeconds()).slice(-2);
-    const millis = ('00' + date.getMilliseconds()).slice(-3);
-    const timestamp = hours + ':' + minutes + ':' + seconds + '.' + millis;
+    const totalSeconds = Math.floor(now / 1000);
+    const hours = Math.floor((totalSeconds / 3600) % 24);
+    const minutes = Math.floor((totalSeconds / 60) % 60);
+    const seconds = totalSeconds % 60;
+    const millis = now % 1000;
+
+    const h = (hours < 10 ? '0' : '') + hours;
+    const m = (minutes < 10 ? '0' : '') + minutes;
+    const s = (seconds < 10 ? '0' : '') + seconds;
+    const ms = (millis < 10 ? '00' : millis < 100 ? '0' : '') + millis;
+
+    const timestamp = h + ':' + m + ':' + s + '.' + ms;
     log('[GoAB ' + timestamp + ']', msg, obj !== undefined ? obj : '');
   }
 }
