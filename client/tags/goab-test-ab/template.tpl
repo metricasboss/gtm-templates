@@ -305,7 +305,6 @@ debugLog('URL do application.js: ' + applicationUrl);
 // ========================================
 
 const callLater = require('callLater');
-const queryPermission = require('queryPermission');
 
 let antiFlickerRemoved = false;
 
@@ -313,14 +312,11 @@ function removeAntiFlicker() {
   if (!antiFlickerRemoved) {
     antiFlickerRemoved = true;
 
-    if (queryPermission('access_globals', 'readwrite', 'document')) {
-      const doc = copyFromWindow('document');
-      const style = doc.getElementById('goab-af');
-      if (style) {
-        style.remove();
-        debugLog('Anti-flicker CSS removido');
-      }
-    }
+    // Sobrescrever com CSS que reverte o anti-flicker
+    const revertCss = '#goab-af{display:none !important;}body{opacity:1 !important;visibility:visible !important}';
+    createStyleElement(revertCss, 'goab-af-revert');
+
+    debugLog('Anti-flicker CSS removido (revertido)');
   }
 }
 
@@ -422,21 +418,6 @@ ___WEB_PERMISSIONS___
                 ],
                 "mapValue": [
                   { "type": 1, "string": "__goabConfig" },
-                  { "type": 8, "boolean": true },
-                  { "type": 8, "boolean": true },
-                  { "type": 8, "boolean": false }
-                ]
-              },
-              {
-                "type": 3,
-                "mapKey": [
-                  { "type": 1, "string": "key" },
-                  { "type": 1, "string": "read" },
-                  { "type": 1, "string": "write" },
-                  { "type": 1, "string": "execute" }
-                ],
-                "mapValue": [
-                  { "type": 1, "string": "document" },
                   { "type": 8, "boolean": true },
                   { "type": 8, "boolean": true },
                   { "type": 8, "boolean": false }
