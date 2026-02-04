@@ -237,40 +237,118 @@ if (currentUrl && currentUrl.indexOf('__goab_disable') !== -1) {
 }
 
 // ========================================
-// PREPARAR CONFIGURAÇÃO PARA O SCRIPT
+// PREPARAR VARIÁVEIS GLOBAIS
 // ========================================
 
-// Criar objeto de configuração
-const goabConfig = {
+// Criar objeto goab_code para marcar inicialização
+const goabInitObj = {
   accountId: data.accountId,
   timeout: timeout,
   version: scriptVersion,
   accountType: accountType,
-  debug: data.enableDebug
+  initialized: true
 };
 
-// Setar configuração no window
-setInWindow('__goabConfig', goabConfig, true);
+setInWindow('goab_code', goabInitObj, true);
+setInWindow('goab', goabInitObj, true);
 
-debugLog('Configuração setada no window.__goabConfig');
+debugLog('Variáveis globais criadas (goab_code, goab)');
 
 // ========================================
-// INJETAR SCRIPT DE INICIALIZAÇÃO DO S3
+// APLICAR ANTI-FLICKER CSS (INLINE)
 // ========================================
 
-const scriptUrl = 'https://gtm-templates.s3.us-east-1.amazonaws.com/goab-init-bundle.js?v=6';
+const createStyleElement = require('createStyleElement');
+
+const antiFlickerCss = 'body{opacity:0 !important;visibility:hidden !important}';
+createStyleElement(antiFlickerCss, 'goab-af');
+
+debugLog('Anti-flicker CSS aplicado');
+
+// ========================================
+// CONSTRUIR URL DO APPLICATION.JS
+// ========================================
+
+const getCookieValues = require('getCookieValues');
+const getTimestamp = require('getTimestamp');
+
+// Pegar user ID do cookie
+const userIdCookie = getCookieValues('goab_uid');
+const userId = userIdCookie && userIdCookie[0] ? userIdCookie[0] : '';
+
+// Construir URL completa
+const pageUrl = getUrl();
+const timestamp = getTimestamp();
+
+const scriptUrlParts = [];
+scriptUrlParts.push('https://');
+scriptUrlParts.push(accountType);
+scriptUrlParts.push('.goab.io/');
+scriptUrlParts.push(data.accountId);
+scriptUrlParts.push('/application.js?v=');
+scriptUrlParts.push(scriptVersion);
+scriptUrlParts.push('&u=');
+scriptUrlParts.push(encodeUriComponent(pageUrl));
+scriptUrlParts.push('&t=');
+scriptUrlParts.push(timestamp);
+if (userId) {
+  scriptUrlParts.push('&uid=');
+  scriptUrlParts.push(encodeUriComponent(userId));
+}
+
+const applicationUrl = scriptUrlParts.join('');
+
+debugLog('URL do application.js: ' + applicationUrl);
+
+// ========================================
+// CONFIGURAR TIMEOUT PARA REMOVER ANTI-FLICKER
+// ========================================
+
+const callLater = require('callLater');
+const queryPermission = require('queryPermission');
+
+let antiFlickerRemoved = false;
+
+function removeAntiFlicker() {
+  if (!antiFlickerRemoved) {
+    antiFlickerRemoved = true;
+
+    if (queryPermission('access_globals', 'readwrite', 'document')) {
+      const doc = copyFromWindow('document');
+      const style = doc.getElementById('goab-af');
+      if (style) {
+        style.remove();
+        debugLog('Anti-flicker CSS removido');
+      }
+    }
+  }
+}
+
+// Timeout fallback
+callLater(function() {
+  if (!antiFlickerRemoved) {
+    debugLog('Timeout atingido (' + timeout + 'ms), removendo anti-flicker');
+    removeAntiFlicker();
+  }
+}, timeout);
+
+// ========================================
+// INJETAR APPLICATION.JS DA GOAB
+// ========================================
 
 injectScript(
-  scriptUrl,
+  applicationUrl,
   function() {
-    debugLog('Script GoAB injetado com sucesso');
+    debugLog('Script application.js carregado com sucesso');
+    removeAntiFlicker();
     data.gtmOnSuccess();
   },
   function() {
-    debugLog('Erro ao injetar script GoAB');
+    debugLog('Erro ao carregar application.js');
+    removeAntiFlicker();
     data.gtmOnFailure();
   },
-  'goabInit'
+  'goabApplication'
 );
 
 
@@ -348,6 +426,60 @@ ___WEB_PERMISSIONS___
                   { "type": 8, "boolean": true },
                   { "type": 8, "boolean": false }
                 ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  { "type": 1, "string": "key" },
+                  { "type": 1, "string": "read" },
+                  { "type": 1, "string": "write" },
+                  { "type": 1, "string": "execute" }
+                ],
+                "mapValue": [
+                  { "type": 1, "string": "document" },
+                  { "type": 8, "boolean": true },
+                  { "type": 8, "boolean": true },
+                  { "type": 8, "boolean": false }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "access_cookies",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "keys",
+          "value": {
+            "type": 2,
+            "listItem": [
+              {
+                "type": 3,
+                "mapKey": [
+                  { "type": 1, "string": "name" },
+                  { "type": 1, "string": "domain" },
+                  { "type": 1, "string": "path" },
+                  { "type": 1, "string": "secure" },
+                  { "type": 1, "string": "session" }
+                ],
+                "mapValue": [
+                  { "type": 1, "string": "goab_uid" },
+                  { "type": 1, "string": "*" },
+                  { "type": 1, "string": "*" },
+                  { "type": 1, "string": "any" },
+                  { "type": 1, "string": "any" }
+                ]
               }
             ]
           }
@@ -371,9 +503,7 @@ ___WEB_PERMISSIONS___
           "value": {
             "type": 2,
             "listItem": [
-              { "type": 1, "string": "https://devs.goab.io/*" },
-              { "type": 1, "string": "https://prod.goab.io/*" },
-              { "type": 1, "string": "https://gtm-templates.s3.us-east-1.amazonaws.com/*" }
+              { "type": 1, "string": "https://devs.goab.io/*" }
             ]
           }
         }
