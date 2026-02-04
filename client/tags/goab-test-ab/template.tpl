@@ -77,57 +77,6 @@ ___TEMPLATE_PARAMETERS___
         }
       },
       {
-        "type": "SELECT",
-        "name": "accountType",
-        "displayName": {
-          "text": "Account Type",
-          "translations": [
-            {
-              "locale": "pt-BR",
-              "text": "Tipo de Conta"
-            }
-          ]
-        },
-        "macrosInSelect": false,
-        "selectItems": [
-          {
-            "value": "devs",
-            "displayValue": {
-              "text": "Development (devs.goab.io)",
-              "translations": [
-                {
-                  "locale": "pt-BR",
-                  "text": "Desenvolvimento (devs.goab.io)"
-                }
-              ]
-            }
-          },
-          {
-            "value": "prod",
-            "displayValue": {
-              "text": "Production (prod.goab.io)",
-              "translations": [
-                {
-                  "locale": "pt-BR",
-                  "text": "Produção (prod.goab.io)"
-                }
-              ]
-            }
-          }
-        ],
-        "simpleValueType": true,
-        "defaultValue": "devs",
-        "help": {
-          "text": "Environment: use devs for testing, prod for production",
-          "translations": [
-            {
-              "locale": "pt-BR",
-              "text": "Ambiente: use devs para testar, prod para produção"
-            }
-          ]
-        }
-      },
-      {
         "type": "TEXT",
         "name": "timeout",
         "displayName": {
@@ -230,12 +179,8 @@ if (!data.accountId || data.accountId.trim() === '') {
   return data.gtmOnFailure();
 }
 
-// Validar accountType
-const accountType = data.accountType || 'devs';
-if (accountType !== 'devs' && accountType !== 'prod') {
-  debugLog('Erro: accountType deve ser "devs" ou "prod"');
-  return data.gtmOnFailure();
-}
+// Fixar accountType como 'devs' (prod.goab.io não existe)
+const accountType = 'devs';
 
 // Validar timeout
 let timeout = 1000; // padrão
