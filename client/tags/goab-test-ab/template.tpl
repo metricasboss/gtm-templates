@@ -297,7 +297,7 @@ debugLog('Configuração setada no window.__goabConfig');
 // INJETAR SCRIPT DE INICIALIZAÇÃO DO S3
 // ========================================
 
-const scriptUrl = 'https://gtm-templates.s3.sa-east-1.amazonaws.com/goab-init-bundle.js';
+const scriptUrl = 'https://gtm-templates.s3.us-east-1.amazonaws.com/goab-init-bundle.js';
 
 injectScript(
   scriptUrl,
@@ -397,7 +397,7 @@ ___WEB_PERMISSIONS___
             "listItem": [
               { "type": 1, "string": "https://devs.goab.io/*" },
               { "type": 1, "string": "https://prod.goab.io/*" },
-              { "type": 1, "string": "https://gtm-templates.s3.sa-east-1.amazonaws.com/*" }
+              { "type": 1, "string": "https://gtm-templates.s3.us-east-1.amazonaws.com/*" }
             ]
           }
         }
