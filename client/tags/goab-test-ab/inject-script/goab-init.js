@@ -111,6 +111,9 @@
     // Função de inicialização
     init: function() {
       var self = this;
+      var checkInterval;
+      var checksCount = 0;
+      var maxChecks = this.timeout / 100; // Checar a cada 100ms até o timeout
 
       this.log('Inicializando...');
 
@@ -119,9 +122,25 @@
 
       // Configurar timeout
       timeoutId = setTimeout(function() {
+        clearInterval(checkInterval);
         self.log('Timeout atingido, removendo anti-flicker');
         self.removeAntiFlicker();
       }, this.timeout);
+
+      // Polling para verificar se application.js criou/modificou window.goab
+      checkInterval = setInterval(function() {
+        checksCount++;
+
+        // Verificar se window.goab foi modificado pelo application.js
+        // O application.js sobrescreve window.goab com seu próprio objeto
+        if (window.goab && window.goab !== self && typeof window.goab.version !== 'undefined') {
+          clearInterval(checkInterval);
+          self.log('Script application.js carregado e inicializado (detectado via polling)');
+          self.removeAntiFlicker();
+        } else if (checksCount >= maxChecks) {
+          clearInterval(checkInterval);
+        }
+      }, 100);
 
       // Carregar script principal
       this.loadMainScript(this.buildScriptUrl());
