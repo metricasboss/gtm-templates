@@ -1,0 +1,23 @@
+{
+  "name": "goab-init-script",
+  "version": "1.0.0",
+  "description": "GoAB initialization script for GTM template",
+  "main": "goab-init.js",
+  "scripts": {
+    "build": "webpack",
+    "deploy": "pnpm build && webpack-s3-plugin"
+  },
+  "keywords": [
+    "goab",
+    "ab-testing",
+    "gtm"
+  ],
+  "author": "Métricas Boss",
+  "license": "MIT",
+  "devDependencies": {
+    "dotenv": "^16.3.1",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-s3-plugin": "1.2.0-rc.0"
+  }
+}

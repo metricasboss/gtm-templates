@@ -1,0 +1,138 @@
+/**
+ * GoAB Initialization Script
+ * Powered by Métricas Boss
+ *
+ * Este script inicializa o GoAB A/B testing platform
+ * Lê configuração de window.__goabConfig
+ */
+
+(function() {
+  // Ler configuração do window
+  var config = window.__goabConfig || {};
+
+  // Variáveis globais do script
+  var timeoutId, doc, antiFlickerRemoved, goabObj;
+
+  doc = document;
+  antiFlickerRemoved = false;
+
+  goabObj = {
+    accountId: config.accountId || '',
+    timeout: config.timeout || 1000,
+    version: config.version || '2.0.0',
+    accountType: config.accountType || 'devs',
+    debug: config.debug || false,
+
+    log: function(msg) {
+      if (this.debug && console && console.log) {
+        console.log('[GoAB]', msg);
+      }
+    },
+
+    // Função para construir URL do script principal
+    buildScriptUrl: function() {
+      var settings = {};
+      var actualAccountType, userId;
+
+      // Tentar ler accountType override do localStorage
+      try {
+        settings = JSON.parse(localStorage.getItem('goab_settings') || '{}');
+      } catch(e) {
+        settings = {};
+      }
+
+      actualAccountType = settings.atp || this.accountType;
+      userId = this.getUserId();
+
+      return 'https://' + actualAccountType + '.goab.io/' +
+             this.accountId + '/application.js' +
+             '?v=' + this.version +
+             '&u=' + encodeURIComponent(location.href) +
+             '&t=' + Date.now() +
+             (userId ? '&uid=' + encodeURIComponent(userId) : '');
+    },
+
+    // Função para ler user ID do cookie
+    getUserId: function() {
+      var match = doc.cookie.match(/(?:^|;)\s*goab_uid=([^;]*)/);
+      return match ? decodeURIComponent(match[1]) : '';
+    },
+
+    // Função para adicionar anti-flicker CSS
+    addAntiFlicker: function() {
+      var style = doc.createElement('style');
+      style.id = 'goab-af';
+      style.textContent = 'body{opacity:0 !important;visibility:hidden !important}';
+      doc.head.appendChild(style);
+      this.log('Anti-flicker CSS aplicado');
+    },
+
+    // Função para remover anti-flicker CSS
+    removeAntiFlicker: function() {
+      if (!antiFlickerRemoved) {
+        antiFlickerRemoved = true;
+
+        var styleEl = doc.getElementById('goab-af');
+        if (styleEl) {
+          styleEl.remove();
+        }
+
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+
+        this.log('Anti-flicker CSS removido');
+      }
+    },
+
+    // Função para carregar script principal
+    loadMainScript: function(url) {
+      var self = this;
+      var script = doc.createElement('script');
+
+      script.src = url;
+      script.crossOrigin = 'anonymous';
+      script.fetchPriority = 'high';
+
+      script.onload = script.onerror = function() {
+        self.removeAntiFlicker();
+      };
+
+      try {
+        doc.head.appendChild(script);
+        this.log('Script principal carregando: ' + url);
+      } catch(e) {
+        this.log('Erro ao carregar script: ' + e);
+        self.removeAntiFlicker();
+      }
+    },
+
+    // Função de inicialização
+    init: function() {
+      var self = this;
+
+      this.log('Inicializando...');
+
+      // Aplicar anti-flicker
+      this.addAntiFlicker();
+
+      // Configurar timeout
+      timeoutId = setTimeout(function() {
+        self.log('Timeout atingido, removendo anti-flicker');
+        self.removeAntiFlicker();
+      }, this.timeout);
+
+      // Carregar script principal
+      this.loadMainScript(this.buildScriptUrl());
+    }
+  };
+
+  // Setar na window
+  window.goab_code = goabObj;
+  window.goab = goabObj;
+
+  // Inicializar
+  goabObj.init();
+
+  goabObj.log('Objeto criado e inicializado');
+})();
