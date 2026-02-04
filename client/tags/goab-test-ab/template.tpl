@@ -158,6 +158,7 @@ const getUrl = require('getUrl');
 const makeNumber = require('makeNumber');
 const encodeUriComponent = require('encodeUriComponent');
 const getTimestampMillis = require('getTimestampMillis');
+const Math = require('Math');
 
 // ========================================
 // FUNÇÃO DE DEBUG
