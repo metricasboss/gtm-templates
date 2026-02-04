@@ -127,15 +127,31 @@
         self.removeAntiFlicker();
       }, this.timeout);
 
-      // Polling para verificar se application.js criou/modificou window.goab
-      self.log('Iniciando polling (max checks: ' + maxChecks + ')');
+      // Polling para verificar se application.js foi executado
+      // Verifica se novas propriedades foram adicionadas ao window.goab
+      var initialKeys = [];
+      for (var key in window.goab) {
+        if (window.goab.hasOwnProperty(key)) {
+          initialKeys.push(key);
+        }
+      }
+
+      self.log('Iniciando polling (max checks: ' + maxChecks + ', keys iniciais: ' + initialKeys.length + ')');
       checkInterval = setInterval(function() {
         checksCount++;
-        self.log('Check #' + checksCount + ' - window.goab mudou? ' + (window.goab !== self));
 
-        // Verificar se window.goab foi modificado pelo application.js
-        // O application.js sobrescreve window.goab com seu próprio objeto
-        if (window.goab && window.goab !== self) {
+        var currentKeysCount = 0;
+        for (var key in window.goab) {
+          if (window.goab.hasOwnProperty(key)) {
+            currentKeysCount++;
+          }
+        }
+
+        var hasNewKeys = currentKeysCount > initialKeys.length;
+        self.log('Check #' + checksCount + ' - keys: ' + currentKeysCount + ' (novo: ' + hasNewKeys + ')');
+
+        // Se novas propriedades foram adicionadas, application.js executou
+        if (hasNewKeys || (window.goab && window.goab !== self)) {
           clearInterval(checkInterval);
           self.log('Script application.js detectado!');
           self.removeAntiFlicker();
