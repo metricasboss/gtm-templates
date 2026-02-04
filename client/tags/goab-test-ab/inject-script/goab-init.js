@@ -131,16 +131,17 @@
       self.log('Iniciando polling (max checks: ' + maxChecks + ')');
       checkInterval = setInterval(function() {
         checksCount++;
+        self.log('Check #' + checksCount + ' - window.goab mudou? ' + (window.goab !== self));
 
         // Verificar se window.goab foi modificado pelo application.js
         // O application.js sobrescreve window.goab com seu próprio objeto
         if (window.goab && window.goab !== self) {
           clearInterval(checkInterval);
-          self.log('Script application.js detectado (check #' + checksCount + ')');
+          self.log('Script application.js detectado!');
           self.removeAntiFlicker();
         } else if (checksCount >= maxChecks) {
           clearInterval(checkInterval);
-          self.log('Polling finalizado sem detectar application.js (' + checksCount + ' checks)');
+          self.log('Polling finalizado sem detectar (' + checksCount + ' checks)');
         }
       }, 100);
 
