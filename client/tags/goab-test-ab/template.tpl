@@ -344,7 +344,7 @@ ___WEB_PERMISSIONS___
                 ],
                 "mapValue": [
                   { "type": 1, "string": "__goabConfig" },
-                  { "type": 8, "boolean": false },
+                  { "type": 8, "boolean": true },
                   { "type": 8, "boolean": true },
                   { "type": 8, "boolean": false }
                 ]
