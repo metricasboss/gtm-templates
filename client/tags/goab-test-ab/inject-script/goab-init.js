@@ -25,7 +25,8 @@
 
     log: function(msg) {
       if (this.debug && console && console.log) {
-        console.log('[GoAB]', msg);
+        var timestamp = new Date().toISOString().split('T')[1].replace('Z', '');
+        console.log('[GoAB ' + timestamp + ']', msg);
       }
     },
 
